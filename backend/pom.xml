@@ -8,7 +8,7 @@
 		<version>3.4.5</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>es.codeurjc.shopventory</groupId>
+	<groupId>es.codeurjc</groupId>
 	<artifactId>shopventory</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>shopventory</name>
