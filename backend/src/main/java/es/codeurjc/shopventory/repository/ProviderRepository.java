@@ -13,7 +13,7 @@ import es.codeurjc.shopventory.model.Provider;
 public interface ProviderRepository extends JpaRepository<Provider, Long> {
 
     Optional<Provider> findByName(String name);
-    Page<Provider> findAllOrderByName(Pageable pageable);
+    Page<Provider> findAllByOrderByName(Pageable pageable);
 
     
 }

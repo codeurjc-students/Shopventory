@@ -12,6 +12,6 @@ import es.codeurjc.shopventory.model.Product;
 public interface ProductRepository  extends JpaRepository<Product, Long>{
 
     Optional<Product> findByName(String name);
-    Page<Product> findAllOrderByName(Pageable pageable);
+    Page<Product> findAllByOrderByName(Pageable pageable);
     
 }

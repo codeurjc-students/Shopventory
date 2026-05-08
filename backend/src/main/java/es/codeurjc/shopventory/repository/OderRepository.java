@@ -12,7 +12,7 @@ import es.codeurjc.shopventory.model.Order;
 
 public interface OderRepository extends JpaRepository<Order, Long>{
 
-    Page<Order> findAllOrderByOrderDate(Pageable pageable);
-    Optional<Order> findBy(Long id);
+    Page<Order> findAllByOrderByOrderDate(Pageable pageable);
+    Optional<Order> findById(Long id);
 
 }
