@@ -1,0 +1,36 @@
+version: "3.9"
+services:
+  web:
+    image: tomy014/shopventory
+    ports:
+      - "443:8443"
+    environment:
+      - DATABASE_URL=jdbc:mysql://db:3306/shopventory
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-password}
+      - SPRING_JPA_HIBERNATE_DDL-AUTO=update
+      - JWT_SECRET=${JWT_SECRET:-shopventoryJwtSecret2024ChangeMe!}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: on-failure
+
+  db:
+    image: mysql:8.0.32
+    container_name: shopventory-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-password}
+      - MYSQL_DATABASE=shopventory
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+      start_period: 30s
+    restart: on-failure
+
+volumes:
+  mysql-data:
