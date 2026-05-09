@@ -1,11 +1,13 @@
 package es.codeurjc.shopventory.model;
 
-import java.sql.Date;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 
 @Entity(name = "OrderTable")
 public class Order {
@@ -13,98 +15,92 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    
-    private String userId;
-    
-    private String productId;
-    
-    private int quantity;
-    
-    private int totalPrice; // Assuming price is calculated based on productId and quantity, plus taxes and shipping
-    
-    private String status;
-    
-    private Date orderDate;
-    
-    private Date deliveryDate;
 
-    public Order() {
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OrderType type;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status = OrderStatus.PENDING;
+
+    private LocalDateTime orderDate = LocalDateTime.now();
+
+    private LocalDate deliveryDate;
+
+    private String notes;
+
+    private BigDecimal discount = BigDecimal.ZERO;
+
+    private BigDecimal totalAmount = BigDecimal.ZERO;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_user_id")
+    @JsonIgnore
+    private User createdBy;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "provider_id")
+    private Provider provider;
+
+    private String customerName;
+
+    private String customerEmail;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> items = new ArrayList<>();
+
+    public Order() {}
+
+    public Order(OrderType type, User createdBy) {
+        this.type = type;
+        this.createdBy = createdBy;
+        this.orderDate = LocalDateTime.now();
+        this.status = OrderStatus.PENDING;
     }
 
-    public Order(String userId, String productId, int quantity, int totalPrice, String status, Date orderDate,
-            Date deliveryDate) {
-        this.userId = userId;
-        this.productId = productId;
-        this.quantity = quantity;
-        this.totalPrice = totalPrice;
-        this.status = status;
-        this.orderDate = orderDate;
-        this.deliveryDate = deliveryDate;
+    public void recalculateTotal() {
+        BigDecimal subtotal = items.stream()
+                .map(OrderItem::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        this.totalAmount = subtotal.subtract(discount != null ? discount : BigDecimal.ZERO);
     }
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public OrderType getType() { return type; }
+    public void setType(OrderType type) { this.type = type; }
 
-    public String getUserId() {
-        return userId;
-    }
+    public OrderStatus getStatus() { return status; }
+    public void setStatus(OrderStatus status) { this.status = status; }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
+    public LocalDateTime getOrderDate() { return orderDate; }
+    public void setOrderDate(LocalDateTime orderDate) { this.orderDate = orderDate; }
 
-    public String getProductId() {
-        return productId;
-    }
+    public LocalDate getDeliveryDate() { return deliveryDate; }
+    public void setDeliveryDate(LocalDate deliveryDate) { this.deliveryDate = deliveryDate; }
 
-    public void setProductId(String productId) {
-        this.productId = productId;
-    }
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
 
-    public int getQuantity() {
-        return quantity;
-    }
+    public BigDecimal getDiscount() { return discount; }
+    public void setDiscount(BigDecimal discount) { this.discount = discount; }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
+    public BigDecimal getTotalAmount() { return totalAmount; }
+    public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
 
-    public int getTotalPrice() {
-        return totalPrice;
-    }
+    public User getCreatedBy() { return createdBy; }
+    public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
 
-    public void setTotalPrice(int totalPrice) {
-        this.totalPrice = totalPrice;
-    }
+    public Provider getProvider() { return provider; }
+    public void setProvider(Provider provider) { this.provider = provider; }
 
-    public String getStatus() {
-        return status;
-    }
+    public String getCustomerName() { return customerName; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+    public String getCustomerEmail() { return customerEmail; }
+    public void setCustomerEmail(String customerEmail) { this.customerEmail = customerEmail; }
 
-    public Date getOrderDate() {
-        return orderDate;
-    }
-
-    public void setOrderDate(Date orderDate) {
-        this.orderDate = orderDate;
-    }
-
-    public Date getDeliveryDate() {
-        return deliveryDate;
-    }
-
-    public void setDeliveryDate(Date deliveryDate) {
-        this.deliveryDate = deliveryDate;
-    }
-
-
+    public List<OrderItem> getItems() { return items; }
+    public void setItems(List<OrderItem> items) { this.items = items; }
 }

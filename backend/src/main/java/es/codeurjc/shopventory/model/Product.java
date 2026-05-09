@@ -1,17 +1,17 @@
 package es.codeurjc.shopventory.model;
 
+import java.math.BigDecimal;
 import java.sql.Blob;
+import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity(name = "ProductTable")
 public class Product {
@@ -20,102 +20,92 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @NotBlank
     private String name;
 
+    @Column(unique = true)
+    private String sku;
+
     private String description;
+
+    private String descriptionShort;
 
     @Lob
     @JsonIgnore
     private Blob productImage;
 
-    private Long price;
+    @NotNull
+    @DecimalMin("0.0")
+    private BigDecimal price = BigDecimal.ZERO;
 
-    private int stock;
+    @Min(0)
+    private int stock = 0;
 
-    private String descriptionShort;
+    @Min(0)
+    private int minStockThreshold = 5;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    private Set<String> category;
+    private Set<String> categories = new HashSet<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "provider_id")
+    @JsonIgnore
+    private Provider provider;
 
-    public Product() {
-    }
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    public Product(String name, String description, Blob productImage, Long price, int stock, String descriptionShort,
-            Set<String> category) {
+    public Product() {}
+
+    public Product(String name, String sku, String description, String descriptionShort,
+                   BigDecimal price, int stock, int minStockThreshold, Set<String> categories) {
         this.name = name;
+        this.sku = sku;
         this.description = description;
-        this.productImage = productImage;
+        this.descriptionShort = descriptionShort;
         this.price = price;
         this.stock = stock;
-        this.descriptionShort = descriptionShort;
-        this.category = category;
+        this.minStockThreshold = minStockThreshold;
+        this.categories = categories;
+        this.createdAt = LocalDateTime.now();
     }
 
-
-    public Long getId() {
-        return id;
+    public boolean isLowStock() {
+        return stock <= minStockThreshold;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public String getSku() { return sku; }
+    public void setSku(String sku) { this.sku = sku; }
 
-    public String getDescription() {
-        return description;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public String getDescriptionShort() { return descriptionShort; }
+    public void setDescriptionShort(String descriptionShort) { this.descriptionShort = descriptionShort; }
 
-    public Blob getProductImage() {
-        return productImage;
-    }
+    public Blob getProductImage() { return productImage; }
+    public void setProductImage(Blob productImage) { this.productImage = productImage; }
 
-    public void setProductImage(Blob productImage) {
-        this.productImage = productImage;
-    }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
 
-    public Long getPrice() {
-        return price;
-    }
+    public int getStock() { return stock; }
+    public void setStock(int stock) { this.stock = stock; }
 
-    public void setPrice(Long price) {
-        this.price = price;
-    }
+    public int getMinStockThreshold() { return minStockThreshold; }
+    public void setMinStockThreshold(int minStockThreshold) { this.minStockThreshold = minStockThreshold; }
 
-    public int getStock() {
-        return stock;
-    }
+    public Set<String> getCategories() { return categories; }
+    public void setCategories(Set<String> categories) { this.categories = categories; }
 
-    public void setStock(int stock) {
-        this.stock = stock;
-    }
+    public Provider getProvider() { return provider; }
+    public void setProvider(Provider provider) { this.provider = provider; }
 
-    public String getDescriptionShort() {
-        return descriptionShort;
-    }
-
-    public void setDescriptionShort(String descriptionShort) {
-        this.descriptionShort = descriptionShort;
-    }
-
-    public Set<String> getCategory() {
-        return category;
-    }
-
-    public void setCategory(Set<String> category) {
-        this.category = category;
-    }
-
-
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }
