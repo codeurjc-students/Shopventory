@@ -6,8 +6,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class SPAController {
 
-    @GetMapping({"/new/**", "/new"})
-    public String redirect() {
-        return "forward:/new/index.html";
+    @GetMapping(value = {"/{path:[^\\.]*}"})
+    public String forwardRoot() {
+        return "forward:/index.html";
+    }
+
+    @GetMapping(value = {"/{path1:[^\\.]*}/{path2:[^\\.]*}", "/{path1:[^\\.]*}/{path2:[^\\.]*}/{path3:[^\\.]*}"})
+    public String forwardNested() {
+        return "forward:/index.html";
     }
 }
