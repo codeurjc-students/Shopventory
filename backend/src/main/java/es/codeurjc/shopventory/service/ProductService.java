@@ -1,5 +1,122 @@
 package es.codeurjc.shopventory.service;
 
+import es.codeurjc.shopventory.dto.PageResponse;
+import es.codeurjc.shopventory.dto.ProductDTO;
+import es.codeurjc.shopventory.exception.ConflictException;
+import es.codeurjc.shopventory.exception.ResourceNotFoundException;
+import es.codeurjc.shopventory.model.Product;
+import es.codeurjc.shopventory.model.Provider;
+import es.codeurjc.shopventory.repository.ProductRepository;
+import es.codeurjc.shopventory.repository.ProviderRepository;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.sql.rowset.serial.SerialBlob;
+import java.io.IOException;
+import java.sql.SQLException;
+
+@Service
+@Transactional
 public class ProductService {
 
+    private final ProductRepository productRepository;
+    private final ProviderRepository providerRepository;
+
+    public ProductService(ProductRepository productRepository, ProviderRepository providerRepository) {
+        this.productRepository = productRepository;
+        this.providerRepository = providerRepository;
+    }
+
+    public Product create(ProductDTO dto) {
+        if (dto.getSku() != null && !dto.getSku().isBlank()
+                && productRepository.existsBySku(dto.getSku())) {
+            throw new ConflictException("SKU already exists: " + dto.getSku());
+        }
+        Product product = mapDtoToProduct(new Product(), dto);
+        return productRepository.save(product);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<Product> findAll(Pageable pageable) {
+        return new PageResponse<>(productRepository.findAll(pageable));
+    }
+
+    @Transactional(readOnly = true)
+    public Product findById(Long id) {
+        return getProductOrThrow(id);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<Product> search(String query, Pageable pageable) {
+        return new PageResponse<>(
+                productRepository.findByNameContainingIgnoreCaseOrDescriptionShortContainingIgnoreCase(
+                        query, query, pageable));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<Product> findByCategory(String category, Pageable pageable) {
+        return new PageResponse<>(productRepository.findByCategoriesContaining(category, pageable));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<Product> findLowStock(Pageable pageable) {
+        return new PageResponse<>(productRepository.findLowStockProducts(pageable));
+    }
+
+    public Product update(Long id, ProductDTO dto) {
+        Product product = getProductOrThrow(id);
+        if (dto.getSku() != null && !dto.getSku().isBlank()
+                && !dto.getSku().equals(product.getSku())
+                && productRepository.existsBySku(dto.getSku())) {
+            throw new ConflictException("SKU already exists: " + dto.getSku());
+        }
+        return productRepository.save(mapDtoToProduct(product, dto));
+    }
+
+    public void delete(Long id) {
+        if (!productRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Product", id);
+        }
+        productRepository.deleteById(id);
+    }
+
+    public Product updateImage(Long id, MultipartFile file) throws IOException, SQLException {
+        Product product = getProductOrThrow(id);
+        product.setProductImage(new SerialBlob(file.getBytes()));
+        return productRepository.save(product);
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] getImage(Long id) throws SQLException, IOException {
+        Product product = getProductOrThrow(id);
+        if (product.getProductImage() == null) {
+            throw new ResourceNotFoundException("Product image not found for id: " + id);
+        }
+        int length = (int) product.getProductImage().length();
+        return product.getProductImage().getBytes(1, length);
+    }
+
+    private Product mapDtoToProduct(Product product, ProductDTO dto) {
+        product.setName(dto.getName());
+        product.setSku(dto.getSku());
+        product.setDescription(dto.getDescription());
+        product.setDescriptionShort(dto.getDescriptionShort());
+        product.setPrice(dto.getPrice());
+        product.setStock(dto.getStock());
+        product.setMinStockThreshold(dto.getMinStockThreshold());
+        product.setCategories(dto.getCategories());
+        if (dto.getProviderId() != null) {
+            Provider provider = providerRepository.findById(dto.getProviderId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Provider", dto.getProviderId()));
+            product.setProvider(provider);
+        }
+        return product;
+    }
+
+    private Product getProductOrThrow(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", id));
+    }
 }
