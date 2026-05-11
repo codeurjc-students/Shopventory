@@ -1,8 +1,5 @@
 package es.codeurjc.shopventory.security;
 
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
+// Unused - all security is configured in RestSecurityConfig
 public class WebSecurityConfig {
-
 }
