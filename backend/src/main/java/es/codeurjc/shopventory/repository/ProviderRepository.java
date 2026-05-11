@@ -8,12 +8,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import es.codeurjc.shopventory.model.Provider;
 
-
-
 public interface ProviderRepository extends JpaRepository<Provider, Long> {
 
     Optional<Provider> findByName(String name);
-    Page<Provider> findAllByOrderByName(Pageable pageable);
 
-    
+    boolean existsByName(String name);
+
+    Page<Provider> findByNameContainingIgnoreCase(String name, Pageable pageable);
 }
