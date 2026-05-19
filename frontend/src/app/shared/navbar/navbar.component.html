@@ -1,0 +1,59 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" routerLink="/dashboard">
+      <i class="bi bi-box-seam me-2"></i>Shopventory
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav me-auto" *ngIf="auth.isLoggedIn()">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">
+            <i class="bi bi-speedometer2"></i> Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/products" routerLinkActive="active">
+            <i class="bi bi-box"></i> Products
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/orders" routerLinkActive="active">
+            <i class="bi bi-cart"></i> Orders
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/providers" routerLinkActive="active">
+            <i class="bi bi-truck"></i> Providers
+          </a>
+        </li>
+        <li class="nav-item" *ngIf="auth.isAdmin()">
+          <a class="nav-link" routerLink="/users" routerLinkActive="active">
+            <i class="bi bi-people"></i> Users
+          </a>
+        </li>
+        <li class="nav-item" *ngIf="auth.isAdmin()">
+          <a class="nav-link" routerLink="/employees" routerLinkActive="active">
+            <i class="bi bi-person-badge"></i> Employees
+          </a>
+        </li>
+      </ul>
+      <ul class="navbar-nav ms-auto" *ngIf="auth.isLoggedIn()">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown">
+            <i class="bi bi-person-circle"></i>
+            {{ auth.currentUser?.name }} {{ auth.currentUser?.surname }}
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><span class="dropdown-item-text small text-muted">{{ auth.currentUser?.email }}</span></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><button class="dropdown-item text-danger" (click)="logout()">
+              <i class="bi bi-box-arrow-right"></i> Logout
+            </button></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
