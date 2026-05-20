@@ -1,0 +1,57 @@
+<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+  <div class="card shadow" style="width: 480px;">
+    <div class="card-body p-4">
+      <h2 class="card-title text-center mb-2">
+        <i class="bi bi-box-seam text-primary"></i> Shopventory
+      </h2>
+      <h5 class="text-center text-muted mb-4">Create your account</h5>
+
+      <div *ngIf="success" class="alert alert-success">
+        <strong>Registration successful!</strong> Your account is pending admin approval.
+        <br><a routerLink="/login">Back to Login</a>
+      </div>
+
+      <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+      <form *ngIf="!success" [formGroup]="form" (ngSubmit)="submit()">
+        <div class="row">
+          <div class="col-6 mb-3">
+            <label class="form-label">First Name</label>
+            <input type="text" class="form-control" formControlName="name"
+                   [class.is-invalid]="form.get('name')?.invalid && form.get('name')?.touched">
+            <div class="invalid-feedback">Name is required.</div>
+          </div>
+          <div class="col-6 mb-3">
+            <label class="form-label">Last Name</label>
+            <input type="text" class="form-control" formControlName="surname"
+                   [class.is-invalid]="form.get('surname')?.invalid && form.get('surname')?.touched">
+            <div class="invalid-feedback">Surname is required.</div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" formControlName="email"
+                 [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched">
+          <div class="invalid-feedback">Valid email is required.</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-control" formControlName="password"
+                 [class.is-invalid]="form.get('password')?.invalid && form.get('password')?.touched">
+          <div class="invalid-feedback">Minimum 8 characters.</div>
+        </div>
+        <div class="mb-4">
+          <label class="form-label">Phone (optional)</label>
+          <input type="text" class="form-control" formControlName="phone">
+        </div>
+        <button type="submit" class="btn btn-primary w-100" [disabled]="loading">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+          Register
+        </button>
+      </form>
+
+      <hr>
+      <p class="text-center mb-0">Already have an account? <a routerLink="/login">Sign in</a></p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,38 @@
+<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+  <div class="card shadow" style="width: 400px;">
+    <div class="card-body p-4">
+      <h2 class="card-title text-center mb-4">
+        <i class="bi bi-box-seam text-primary"></i> Shopventory
+      </h2>
+      <h5 class="text-center text-muted mb-4">Sign in to your account</h5>
+
+      <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="mb-3">
+          <label class="form-label">Email address</label>
+          <input type="email" class="form-control" formControlName="username"
+                 [class.is-invalid]="form.get('username')?.invalid && form.get('username')?.touched"
+                 placeholder="you@example.com">
+          <div class="invalid-feedback">Please enter a valid email.</div>
+        </div>
+        <div class="mb-4">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-control" formControlName="password"
+                 [class.is-invalid]="form.get('password')?.invalid && form.get('password')?.touched"
+                 placeholder="Password">
+          <div class="invalid-feedback">Password is required.</div>
+        </div>
+        <button type="submit" class="btn btn-primary w-100" [disabled]="loading">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+          Sign In
+        </button>
+      </form>
+
+      <hr>
+      <p class="text-center mb-0">
+        Don't have an account? <a routerLink="/register">Register</a>
+      </p>
+    </div>
+  </div>
+</div>
