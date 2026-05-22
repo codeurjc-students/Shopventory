@@ -16,7 +16,8 @@ export class ErrorInterceptor implements HttpInterceptor {
       catchError((error: HttpErrorResponse) => {
         const isAuthEndpoint = request.url.includes('/api/auth/login')
           || request.url.includes('/api/auth/register')
-          || request.url.includes('/api/auth/me');
+          || request.url.includes('/api/auth/me')
+          || request.url.includes('/api/auth/logout');
 
         if (!isAuthEndpoint) {
           if (error.status === 401) {

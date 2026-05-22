@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, filter, take, takeUntil, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { AuthResponse, LoginRequest, User, UserRegistration } from '../models/user.model';
 
@@ -9,8 +9,15 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   currentUser$ = this.currentUserSubject.asObservable();
 
+  private authReadySubject = new BehaviorSubject<boolean>(false);
+  private cancelLoad$ = new Subject<void>();
+
   constructor(private http: HttpClient, private router: Router) {
     this.loadCurrentUser();
+  }
+
+  waitForAuth(): Observable<boolean> {
+    return this.authReadySubject.pipe(filter(ready => ready), take(1));
   }
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
@@ -24,18 +31,30 @@ export class AuthService {
   }
 
   logout(): void {
+    // Cancel any in-flight loadCurrentUser so it cannot restore auth after we clear it
+    this.cancelLoad$.next();
+    // Clear state and mark auth ready immediately — guards won't hang
+    this.currentUserSubject.next(null);
+    this.authReadySubject.next(true);
+
     this.http.post('/api/auth/logout', {}).subscribe({
-      complete: () => {
-        this.currentUserSubject.next(null);
-        this.router.navigate(['/login']);
-      }
+      next: () => this.router.navigate(['/login']),
+      error: () => this.router.navigate(['/login'])
     });
   }
 
   loadCurrentUser(): void {
-    this.http.get<User>('/api/auth/me').subscribe({
-      next: user => this.currentUserSubject.next(user),
-      error: () => this.currentUserSubject.next(null)
+    this.http.get<User>('/api/auth/me').pipe(
+      takeUntil(this.cancelLoad$)
+    ).subscribe({
+      next: user => {
+        this.currentUserSubject.next(user);
+        this.authReadySubject.next(true);
+      },
+      error: () => {
+        this.currentUserSubject.next(null);
+        this.authReadySubject.next(true);
+      }
     });
   }
 

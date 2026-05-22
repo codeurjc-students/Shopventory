@@ -46,9 +46,14 @@
             {{ auth.currentUser?.name }} {{ auth.currentUser?.surname }}
           </a>
           <ul class="dropdown-menu dropdown-menu-end">
+            <li><span class="dropdown-item-text small text-muted">
+              <i class="bi bi-shield-check me-1" *ngIf="auth.isAdmin()"></i>
+              <i class="bi bi-person me-1" *ngIf="!auth.isAdmin()"></i>
+              {{ auth.isAdmin() ? 'Administrator' : 'Standard User' }}
+            </span></li>
             <li><span class="dropdown-item-text small text-muted">{{ auth.currentUser?.email }}</span></li>
             <li><hr class="dropdown-divider"></li>
-            <li><button class="dropdown-item text-danger" (click)="logout()">
+            <li><button type="button" class="dropdown-item text-danger" (click)="logout()">
               <i class="bi bi-box-arrow-right"></i> Logout
             </button></li>
           </ul>
