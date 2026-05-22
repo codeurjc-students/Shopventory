@@ -55,19 +55,19 @@ public class DataInitializerService {
 
     private void createUsers() {
         User admin = new User("admin@shopventory.com",
-                passwordEncoder.encode("Admin1234!"), "Admin", "Shopventory");
+                passwordEncoder.encode("Admin1234!"), "Carlos", "García");
         admin.setRoles(List.of("ADMIN", "USER"));
         admin.setApproved(true);
         userRepository.save(admin);
 
         User user = new User("user@shopventory.com",
-                passwordEncoder.encode("User1234!"), "Standard", "User");
+                passwordEncoder.encode("User1234!"), "Laura", "Martínez");
         user.setRoles(List.of("USER"));
         user.setApproved(true);
         userRepository.save(user);
 
         User pending = new User("pending@shopventory.com",
-                passwordEncoder.encode("Pending1234!"), "Pending", "User");
+                passwordEncoder.encode("Pending1234!"), "Pedro", "López");
         pending.setRoles(List.of("USER"));
         pending.setApproved(false);
         userRepository.save(pending);
