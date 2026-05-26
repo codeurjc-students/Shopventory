@@ -71,6 +71,8 @@ public class RestSecurityConfig {
                 // Static SPA assets
                 .requestMatchers(HttpMethod.GET, "/", "/index.html", "/*.js",
                         "/*.css", "/*.ico", "/assets/**").permitAll()
+                // Stock update accessible to all authenticated users (must be before ADMIN rule)
+                .requestMatchers(HttpMethod.POST, "/api/products/*/stock").authenticated()
                 // Admin-only endpoints
                 .requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/products/**").hasRole("ADMIN")
