@@ -1,6 +1,8 @@
 package es.codeurjc.shopventory.repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,4 +32,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT COUNT(o) FROM OrderTable o WHERE o.type = :type AND o.status = :status")
     long countByTypeAndStatus(@Param("type") OrderType type, @Param("status") OrderStatus status);
+
+    @Query("SELECT SUM(o.totalAmount) FROM OrderTable o WHERE o.type = :type AND o.status IN :statuses")
+    BigDecimal sumTotalAmountByTypeAndStatusIn(@Param("type") OrderType type, @Param("statuses") Collection<OrderStatus> statuses);
 }

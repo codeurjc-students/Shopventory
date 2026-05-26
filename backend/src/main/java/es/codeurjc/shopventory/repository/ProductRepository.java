@@ -1,5 +1,6 @@
 package es.codeurjc.shopventory.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -22,6 +23,14 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT p FROM ProductTable p WHERE p.stock <= p.minStockThreshold")
     Page<Product> findLowStockProducts(Pageable pageable);
+
+    @Query("SELECT COUNT(p) FROM ProductTable p WHERE p.stock <= p.minStockThreshold")
+    long countLowStockProducts();
+
+    List<Product> findTop5ByOrderByStockDesc();
+
+    @Query("SELECT c, COUNT(p) FROM ProductTable p JOIN p.categories c GROUP BY c")
+    List<Object[]> findCategoryDistribution();
 
     Page<Product> findByProviderId(Long providerId, Pageable pageable);
 }
