@@ -35,17 +35,22 @@ public class StockMovementService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         int stockBefore = product.getStock();
-        int stockAfter = stockBefore + dto.getQuantity();
+        int qty = dto.getQuantity();
+        // Positive value → set stock to that exact amount
+        // Negative value → reduce current stock by that amount
+        int stockAfter = qty >= 0 ? qty : stockBefore + qty;
+        int delta = stockAfter - stockBefore;
+
         if (stockAfter < 0) {
-            throw new BadRequestException("Insufficient stock. Current: " + stockBefore
-                    + ", adjustment: " + dto.getQuantity());
+            throw new BadRequestException(
+                    "Insufficient stock. Current: " + stockBefore + ", reduction: " + Math.abs(qty));
         }
 
         product.setStock(stockAfter);
         productRepository.save(product);
 
         StockMovement movement = new StockMovement(
-                product, dto.getQuantity(), stockBefore, stockAfter,
+                product, delta, stockBefore, stockAfter,
                 StockMovementType.MANUAL_ADJUSTMENT,
                 dto.getReason(), performer);
         return stockMovementRepository.save(movement);

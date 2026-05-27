@@ -53,16 +53,16 @@
             <div *ngIf="stockSuccess" class="alert alert-success py-2">{{ stockSuccess }}</div>
             <div *ngIf="stockError" class="alert alert-danger py-2">{{ stockError }}</div>
             <div class="mb-3">
-              <label class="form-label">Quantity adjustment</label>
+              <label class="form-label">Stock quantity</label>
               <input type="number" class="form-control" [(ngModel)]="stockQuantity"
-                     placeholder="e.g. 10 or -5">
-              <div class="form-text">Use negative values to reduce stock.</div>
+                     placeholder="e.g. 50 or -5">
+              <div class="form-text">Positive: sets exact stock. Negative: reduces current stock.</div>
             </div>
             <div class="mb-3">
               <label class="form-label">Reason</label>
               <input type="text" class="form-control" [(ngModel)]="stockReason" placeholder="Optional">
             </div>
-            <button class="btn btn-primary w-100" (click)="updateStock()" [disabled]="stockQuantity === 0">
+            <button class="btn btn-primary w-100" (click)="updateStock()" [disabled]="stockQuantity == null || stockQuantity < 0">
               Apply
             </button>
           </div>

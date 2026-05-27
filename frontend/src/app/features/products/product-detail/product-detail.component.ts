@@ -12,7 +12,7 @@ export class ProductDetailComponent implements OnInit {
   product: Product | null = null;
   loading = true;
   error = '';
-  stockQuantity = 0;
+  stockQuantity: number | null = null;
   stockReason = '';
   stockSuccess = '';
   stockError = '';
@@ -33,13 +33,13 @@ export class ProductDetailComponent implements OnInit {
   }
 
   updateStock(): void {
-    if (!this.product) return;
+    if (!this.product || this.stockQuantity == null) return;
     this.productService.updateStock(this.product.id, { quantity: this.stockQuantity, reason: this.stockReason }).subscribe({
       next: () => {
         this.productService.getById(this.product!.id).subscribe(p => this.product = p);
         this.stockSuccess = 'Stock updated.';
         this.stockError = '';
-        this.stockQuantity = 0;
+        this.stockQuantity = null;
         this.stockReason = '';
       },
       error: err => { this.stockError = err.error?.error || 'Update failed'; this.stockSuccess = ''; }
