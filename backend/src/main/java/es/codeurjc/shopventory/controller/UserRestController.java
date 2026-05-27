@@ -5,6 +5,10 @@ import es.codeurjc.shopventory.dto.UserRegistrationDTO;
 import es.codeurjc.shopventory.dto.UserResponseDTO;
 import es.codeurjc.shopventory.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +31,12 @@ public class UserRestController {
     }
 
     @Operation(summary = "List all users paginated")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "User list returned",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = PageResponse.class))),
+        @ApiResponse(responseCode = "403", description = "Admin role required",
+            content = @Content)
+    })
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PageResponse<UserResponseDTO>> list(
@@ -39,6 +49,14 @@ public class UserRestController {
     }
 
     @Operation(summary = "Get user by ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "User found",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))),
+        @ApiResponse(responseCode = "403", description = "Admin role required",
+            content = @Content),
+        @ApiResponse(responseCode = "404", description = "User not found",
+            content = @Content)
+    })
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> getById(@PathVariable Long id) {
@@ -46,6 +64,16 @@ public class UserRestController {
     }
 
     @Operation(summary = "Update user")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "User updated",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid user data",
+            content = @Content),
+        @ApiResponse(responseCode = "403", description = "Admin role required",
+            content = @Content),
+        @ApiResponse(responseCode = "404", description = "User not found",
+            content = @Content)
+    })
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> update(@PathVariable Long id,
@@ -54,6 +82,14 @@ public class UserRestController {
     }
 
     @Operation(summary = "Delete user")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "User deleted",
+            content = @Content),
+        @ApiResponse(responseCode = "403", description = "Admin role required",
+            content = @Content),
+        @ApiResponse(responseCode = "404", description = "User not found",
+            content = @Content)
+    })
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
@@ -62,6 +98,14 @@ public class UserRestController {
     }
 
     @Operation(summary = "Approve pending user registration")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "User approved",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))),
+        @ApiResponse(responseCode = "403", description = "Admin role required",
+            content = @Content),
+        @ApiResponse(responseCode = "404", description = "User not found",
+            content = @Content)
+    })
     @PostMapping("/{id}/approve")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> approve(@PathVariable Long id) {
@@ -69,6 +113,14 @@ public class UserRestController {
     }
 
     @Operation(summary = "Enable or disable a user account")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Account status updated",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))),
+        @ApiResponse(responseCode = "403", description = "Admin role required",
+            content = @Content),
+        @ApiResponse(responseCode = "404", description = "User not found",
+            content = @Content)
+    })
     @PostMapping("/{id}/enabled")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDTO> setEnabled(@PathVariable Long id,
@@ -77,6 +129,12 @@ public class UserRestController {
     }
 
     @Operation(summary = "Get list of users pending approval")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Pending users list returned",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = List.class))),
+        @ApiResponse(responseCode = "403", description = "Admin role required",
+            content = @Content)
+    })
     @GetMapping("/pending")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponseDTO>> pending() {
