@@ -14,6 +14,7 @@ export class ProviderListComponent implements OnInit {
   searchTerm = '';
   loading = true;
   error = '';
+  deleteError = '';
 
   constructor(public auth: AuthService, private providerService: ProviderService) {}
 
@@ -21,6 +22,7 @@ export class ProviderListComponent implements OnInit {
 
   load(): void {
     this.loading = true;
+    this.deleteError = '';
     this.providerService.getAll(this.currentPage, 10, this.searchTerm || undefined).subscribe({
       next: p => { this.page = p; this.loading = false; },
       error: () => { this.error = 'Failed to load providers.'; this.loading = false; }
@@ -29,7 +31,11 @@ export class ProviderListComponent implements OnInit {
 
   delete(id: number): void {
     if (!confirm('Delete this provider?')) return;
-    this.providerService.delete(id).subscribe({ next: () => this.load() });
+    this.deleteError = '';
+    this.providerService.delete(id).subscribe({
+      next: () => this.load(),
+      error: err => { this.deleteError = err.error?.error || 'Cannot delete this provider.'; }
+    });
   }
 
   nextPage(): void { if (this.page && !this.page.last) { this.currentPage++; this.load(); } }

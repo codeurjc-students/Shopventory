@@ -43,7 +43,7 @@ public class ProductRestController {
         this.stockMovementService = stockMovementService;
     }
 
-    @Operation(summary = "List all products paginated, optionally filtered by category")
+    @Operation(summary = "List all products paginated, optionally filtered by search, category or provider")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Product list returned",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = PageResponse.class)))
@@ -52,12 +52,16 @@ public class ProductRestController {
     public ResponseEntity<PageResponse<Product>> list(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String category,
+            @RequestParam(required = false) Long providerId,
             @PageableDefault(size = 10) Pageable pageable) {
         if (search != null && !search.isBlank()) {
             return ResponseEntity.ok(productService.search(search, pageable));
         }
         if (category != null && !category.isBlank()) {
             return ResponseEntity.ok(productService.findByCategory(category, pageable));
+        }
+        if (providerId != null) {
+            return ResponseEntity.ok(productService.findByProvider(providerId, pageable));
         }
         return ResponseEntity.ok(productService.findAll(pageable));
     }

@@ -5,6 +5,7 @@ import es.codeurjc.shopventory.dto.ProviderDTO;
 import es.codeurjc.shopventory.exception.ConflictException;
 import es.codeurjc.shopventory.exception.ResourceNotFoundException;
 import es.codeurjc.shopventory.model.Provider;
+import es.codeurjc.shopventory.repository.ProductRepository;
 import es.codeurjc.shopventory.repository.ProviderRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,9 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProviderService {
 
     private final ProviderRepository providerRepository;
+    private final ProductRepository productRepository;
 
-    public ProviderService(ProviderRepository providerRepository) {
+    public ProviderService(ProviderRepository providerRepository, ProductRepository productRepository) {
         this.providerRepository = providerRepository;
+        this.productRepository = productRepository;
     }
 
     public Provider create(ProviderDTO dto) {
@@ -51,8 +54,13 @@ public class ProviderService {
     }
 
     public void delete(Long id) {
-        if (!providerRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Provider", id);
+        Provider provider = providerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Provider", id));
+        long associated = productRepository.countByProvidersContaining(provider);
+        if (associated > 0) {
+            throw new ConflictException(
+                "Cannot delete provider \"" + provider.getName() + "\": it has " + associated +
+                " associated product(s). Remove this provider from all products first.");
         }
         providerRepository.deleteById(id);
     }

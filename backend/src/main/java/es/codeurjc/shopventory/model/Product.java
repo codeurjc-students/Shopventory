@@ -47,10 +47,13 @@ public class Product {
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<String> categories = new HashSet<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "provider_id")
-    @JsonIgnore
-    private Provider provider;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "product_provider",
+        joinColumns = @JoinColumn(name = "product_id"),
+        inverseJoinColumns = @JoinColumn(name = "provider_id")
+    )
+    private Set<Provider> providers = new HashSet<>();
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -103,8 +106,8 @@ public class Product {
     public Set<String> getCategories() { return categories; }
     public void setCategories(Set<String> categories) { this.categories = categories; }
 
-    public Provider getProvider() { return provider; }
-    public void setProvider(Provider provider) { this.provider = provider; }
+    public Set<Provider> getProviders() { return providers; }
+    public void setProviders(Set<Provider> providers) { this.providers = providers; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

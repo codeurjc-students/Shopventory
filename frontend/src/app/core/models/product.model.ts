@@ -8,6 +8,7 @@ export interface Product {
   stock: number;
   minStockThreshold: number;
   categories: string[];
+  providers?: { id: number; name: string }[];
   lowStock: boolean;
   createdAt: string;
 }
@@ -21,7 +22,7 @@ export interface ProductDTO {
   stock: number;
   minStockThreshold: number;
   categories: string[];
-  providerId?: number;
+  providerIds?: number[];
 }
 
 export interface StockUpdate {

@@ -33,7 +33,7 @@ export class ProductFormComponent implements OnInit {
       price: [0, [Validators.required, Validators.min(0)]],
       stock: [0, Validators.min(0)],
       minStockThreshold: [5, Validators.min(0)],
-      providerId: [null]
+      providerIds: [[]]
     });
   }
 
@@ -44,7 +44,16 @@ export class ProductFormComponent implements OnInit {
       this.isEdit = true;
       this.productId = +id;
       this.productService.getById(this.productId).subscribe(p => {
-        this.form.patchValue(p);
+        this.form.patchValue({
+          name: p.name,
+          sku: p.sku || '',
+          description: p.description || '',
+          descriptionShort: p.descriptionShort || '',
+          price: p.price,
+          stock: p.stock,
+          minStockThreshold: p.minStockThreshold,
+          providerIds: p.providers?.map(pr => pr.id) ?? []
+        });
         this.categoriesInput = p.categories?.join(', ') || '';
       });
     }

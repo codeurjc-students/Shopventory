@@ -24,6 +24,11 @@
             <dl class="row mb-0">
               <dt class="col-sm-4">SKU</dt>
               <dd class="col-sm-8">{{ product.sku || '-' }}</dd>
+              <dt class="col-sm-4">Providers</dt>
+              <dd class="col-sm-8">
+                <span *ngFor="let pr of product.providers" class="badge bg-info text-dark me-1">{{ pr.name }}</span>
+                <span *ngIf="!product.providers || product.providers.length === 0" class="text-muted">—</span>
+              </dd>
               <dt class="col-sm-4">Price</dt>
               <dd class="col-sm-8">€{{ product.price | number:'1.2-2' }}</dd>
               <dt class="col-sm-4">Stock</dt>
@@ -62,7 +67,7 @@
               <label class="form-label">Reason</label>
               <input type="text" class="form-control" [(ngModel)]="stockReason" placeholder="Optional">
             </div>
-            <button class="btn btn-primary w-100" (click)="updateStock()" [disabled]="stockQuantity == null">
+            <button type="button" class="btn btn-primary w-100" (click)="updateStock()" [disabled]="stockQuantity == null">
               Apply
             </button>
           </div>

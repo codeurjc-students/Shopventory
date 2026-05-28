@@ -10,22 +10,28 @@
   <div class="card border-0 shadow-sm mb-3">
     <div class="card-body">
       <div class="row g-2">
-        <div class="col-md-6">
+        <div class="col-md-4">
           <div class="input-group">
-            <input type="text" class="form-control" placeholder="Search products..."
+            <input type="text" class="form-control" placeholder="Search by name, SKU..."
                    [(ngModel)]="searchTerm" (keyup.enter)="search()">
             <button class="btn btn-outline-secondary" (click)="search()">
               <i class="bi bi-search"></i>
             </button>
           </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
           <input type="text" class="form-control" placeholder="Filter by category..."
                  [(ngModel)]="categoryFilter" (keyup.enter)="search()">
         </div>
+        <div class="col-md-3">
+          <select class="form-select" [(ngModel)]="providerFilter" (change)="search()">
+            <option [ngValue]="null">All providers</option>
+            <option *ngFor="let p of providers" [ngValue]="p.id">{{ p.name }}</option>
+          </select>
+        </div>
         <div class="col-md-2">
-          <button class="btn btn-outline-secondary w-100" (click)="searchTerm=''; categoryFilter=''; search()">
-            Clear
+          <button class="btn btn-outline-secondary w-100" (click)="clearFilters()">
+            <i class="bi bi-x-circle me-1"></i>Clear
           </button>
         </div>
       </div>
@@ -46,6 +52,7 @@
             <tr>
               <th>SKU</th>
               <th>Name</th>
+              <th>Providers</th>
               <th>Categories</th>
               <th>Price</th>
               <th>Stock</th>
@@ -59,6 +66,10 @@
               <td>
                 <strong>{{ p.name }}</strong>
                 <div class="text-muted small">{{ p.descriptionShort }}</div>
+              </td>
+              <td>
+                <span *ngFor="let pr of p.providers" class="badge bg-info text-dark me-1">{{ pr.name }}</span>
+                <span *ngIf="!p.providers || p.providers.length === 0" class="text-muted small">—</span>
               </td>
               <td>
                 <span *ngFor="let c of p.categories" class="badge bg-secondary me-1">{{ c }}</span>

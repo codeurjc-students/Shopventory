@@ -10,10 +10,11 @@ export class ProductService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(page = 0, size = 10, search?: string, category?: string): Observable<PageResponse<Product>> {
+  getAll(page = 0, size = 10, search?: string, category?: string, providerId?: number): Observable<PageResponse<Product>> {
     let params = new HttpParams().set('page', page).set('size', size);
     if (search) params = params.set('search', search);
     if (category) params = params.set('category', category);
+    if (providerId != null) params = params.set('providerId', providerId);
     return this.http.get<PageResponse<Product>>(this.base, { params });
   }
 

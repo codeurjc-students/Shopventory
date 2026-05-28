@@ -32,7 +32,7 @@ public class ProductDTO {
 
     private Set<String> categories = new HashSet<>();
 
-    private Long providerId;
+    private Set<Long> providerIds = new HashSet<>();
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -58,6 +58,6 @@ public class ProductDTO {
     public Set<String> getCategories() { return categories; }
     public void setCategories(Set<String> categories) { this.categories = categories; }
 
-    public Long getProviderId() { return providerId; }
-    public void setProviderId(Long providerId) { this.providerId = providerId; }
+    public Set<Long> getProviderIds() { return providerIds; }
+    public void setProviderIds(Set<Long> providerIds) { this.providerIds = providerIds; }
 }

@@ -16,7 +16,9 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.sql.rowset.serial.SerialBlob;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -87,6 +89,11 @@ public class ProductService {
         return new PageResponse<>(productRepository.findLowStockProducts(pageable));
     }
 
+    @Transactional(readOnly = true)
+    public PageResponse<Product> findByProvider(Long providerId, Pageable pageable) {
+        return new PageResponse<>(productRepository.findByProviderId(providerId, pageable));
+    }
+
     public Product update(Long id, ProductDTO dto) {
         Product product = getProductOrThrow(id);
         if (dto.getSku() != null && !dto.getSku().isBlank()
@@ -129,10 +136,15 @@ public class ProductService {
         product.setStock(dto.getStock());
         product.setMinStockThreshold(dto.getMinStockThreshold());
         product.setCategories(dto.getCategories());
-        if (dto.getProviderId() != null) {
-            Provider provider = providerRepository.findById(dto.getProviderId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Provider", dto.getProviderId()));
-            product.setProvider(provider);
+        if (dto.getProviderIds() != null && !dto.getProviderIds().isEmpty()) {
+            Set<Provider> providers = new HashSet<>();
+            for (Long pid : dto.getProviderIds()) {
+                providers.add(providerRepository.findById(pid)
+                        .orElseThrow(() -> new ResourceNotFoundException("Provider", pid)));
+            }
+            product.setProviders(providers);
+        } else {
+            product.setProviders(new HashSet<>());
         }
         return product;
     }
