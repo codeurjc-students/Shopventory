@@ -74,8 +74,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public PageResponse<Product> search(String query, Pageable pageable) {
         return new PageResponse<>(
-                productRepository.findByNameContainingIgnoreCaseOrDescriptionShortContainingIgnoreCase(
-                        query, query, pageable));
+                productRepository.searchByNameOrDescriptionOrSku(query, pageable));
     }
 
     @Transactional(readOnly = true)
