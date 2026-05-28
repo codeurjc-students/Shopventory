@@ -2,6 +2,7 @@ package es.codeurjc.shopventory.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -28,6 +29,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<Map<String, Object>> handleConflict(ConflictException ex) {
         return buildError(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrity(DataIntegrityViolationException ex) {
+        String rootMsg = "";
+        if (ex.getCause() != null && ex.getCause().getCause() != null) {
+            rootMsg = String.valueOf(ex.getCause().getCause().getMessage());
+        }
+        if (rootMsg.toLowerCase().contains("sku")) {
+            return buildError(HttpStatus.CONFLICT, "A product with this SKU already exists");
+        }
+        return buildError(HttpStatus.CONFLICT, "Duplicate or invalid value in a unique field");
     }
 
     @ExceptionHandler(BadRequestException.class)

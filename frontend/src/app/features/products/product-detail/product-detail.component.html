@@ -62,7 +62,7 @@
               <label class="form-label">Reason</label>
               <input type="text" class="form-control" [(ngModel)]="stockReason" placeholder="Optional">
             </div>
-            <button class="btn btn-primary w-100" (click)="updateStock()" [disabled]="stockQuantity == null || stockQuantity < 0">
+            <button class="btn btn-primary w-100" (click)="updateStock()" [disabled]="stockQuantity == null">
               Apply
             </button>
           </div>
