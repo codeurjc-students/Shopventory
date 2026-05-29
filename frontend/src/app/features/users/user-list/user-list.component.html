@@ -20,7 +20,7 @@
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
           <thead class="table-light">
-            <tr><th>Name</th><th>Email</th><th>Roles</th><th>Status</th><th>Joined</th><th>Actions</th></tr>
+            <tr><th>Name</th><th>Email</th><th>Roles</th><th>Approval</th><th>Account</th><th>Joined</th><th>Actions</th></tr>
           </thead>
           <tbody>
             <tr *ngFor="let u of page.content">
@@ -35,12 +35,25 @@
                   {{ u.approved ? 'Approved' : 'Pending' }}
                 </span>
               </td>
-              <td>{{ u.createdAt | date:'dd/MM/yyyy' }}</td>
               <td>
-                <button *ngIf="!u.approved" class="btn btn-sm btn-success me-1" (click)="approve(u.id)">
+                <span class="badge" [class.bg-success]="u.enabled" [class.bg-danger]="!u.enabled">
+                  {{ u.enabled ? 'Enabled' : 'Disabled' }}
+                </span>
+              </td>
+              <td>{{ u.createdAt | date:'dd/MM/yyyy' }}</td>
+              <td class="text-nowrap">
+                <button *ngIf="!u.approved" type="button" class="btn btn-sm btn-success me-1" (click)="approve(u.id)">
                   <i class="bi bi-check-lg"></i> Approve
                 </button>
-                <button class="btn btn-sm btn-outline-danger" (click)="delete(u.id)">
+                <button type="button" class="btn btn-sm me-1"
+                        [class.btn-outline-warning]="u.enabled"
+                        [class.btn-outline-success]="!u.enabled"
+                        [title]="u.enabled ? 'Disable account' : 'Enable account'"
+                        (click)="toggleEnabled(u.id, u.enabled)">
+                  <i class="bi" [class.bi-person-dash]="u.enabled" [class.bi-person-check]="!u.enabled"></i>
+                  {{ u.enabled ? 'Disable' : 'Enable' }}
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" title="Delete user" (click)="delete(u.id)">
                   <i class="bi bi-trash"></i>
                 </button>
               </td>

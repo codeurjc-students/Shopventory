@@ -34,6 +34,12 @@ export class UserListComponent implements OnInit {
     this.userService.approve(id).subscribe({ next: () => { this.load(); this.loadPending(); } });
   }
 
+  toggleEnabled(id: number, currentValue: boolean): void {
+    const action = currentValue ? 'disable' : 'enable';
+    if (!confirm(`Are you sure you want to ${action} this account?`)) return;
+    this.userService.setEnabled(id, !currentValue).subscribe({ next: () => this.load() });
+  }
+
   delete(id: number): void {
     if (!confirm('Delete this user?')) return;
     this.userService.delete(id).subscribe({ next: () => this.load() });
