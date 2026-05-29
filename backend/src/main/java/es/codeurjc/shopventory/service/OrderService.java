@@ -104,7 +104,8 @@ public class OrderService {
 
             product.setStock(stockAfter);
             productRepository.save(product);
-            stockMovementService.recordMovement(product, item.getQuantity(), stockBefore, stockAfter,
+            int delta = stockAfter - stockBefore;
+            stockMovementService.recordMovement(product, delta, stockBefore, stockAfter,
                     movementType, "Order #" + order.getId(), confirmer);
         }
 

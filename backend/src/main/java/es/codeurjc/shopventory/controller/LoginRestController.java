@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -70,8 +69,8 @@ public class LoginRestController {
             content = @Content)
     })
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
-        String result = userLoginService.logout(request, response);
+    public ResponseEntity<String> logout(HttpServletResponse response) {
+        String result = userLoginService.logout(response);
         return ResponseEntity.ok(result);
     }
 

@@ -11,10 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 @Service
 public class UserLoginService {
@@ -39,36 +36,12 @@ public class UserLoginService {
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		String accessToken = SecurityCipher.decrypt(encryptedAccessToken);
-		String refreshToken = SecurityCipher.decrypt(encryptedRefreshToken);
-		
 		String username = loginRequest.getUsername();
 		UserDetails user = userDetailsService.loadUserByUsername(username);
 
-		Boolean accessTokenValid = jwtTokenProvider.validateToken(accessToken);
-		Boolean refreshTokenValid = jwtTokenProvider.validateToken(refreshToken);
-
 		HttpHeaders responseHeaders = new HttpHeaders();
-		Token newAccessToken;
-		Token newRefreshToken;
-		if (!accessTokenValid && !refreshTokenValid) {
-			newAccessToken = jwtTokenProvider.generateToken(user);
-			newRefreshToken = jwtTokenProvider.generateRefreshToken(user);
-			addAccessTokenCookie(responseHeaders, newAccessToken);
-			addRefreshTokenCookie(responseHeaders, newRefreshToken);
-		}
-
-		if (!accessTokenValid && refreshTokenValid) {
-			newAccessToken = jwtTokenProvider.generateToken(user);
-			addAccessTokenCookie(responseHeaders, newAccessToken);
-		}
-
-		if (accessTokenValid && refreshTokenValid) {
-			newAccessToken = jwtTokenProvider.generateToken(user);
-			newRefreshToken = jwtTokenProvider.generateRefreshToken(user);
-			addAccessTokenCookie(responseHeaders, newAccessToken);
-			addRefreshTokenCookie(responseHeaders, newRefreshToken);
-		}
+		addAccessTokenCookie(responseHeaders, jwtTokenProvider.generateToken(user));
+		addRefreshTokenCookie(responseHeaders, jwtTokenProvider.generateRefreshToken(user));
 
 		AuthResponse loginResponse = new AuthResponse(AuthResponse.Status.SUCCESS,
 				"Auth successful. Tokens are created in cookie.");
@@ -107,24 +80,12 @@ public class UserLoginService {
 		return authentication.getName();
 	}
 
-	public String logout(HttpServletRequest request, HttpServletResponse response) {
+	public String logout(HttpServletResponse response) {
 
-		HttpSession session = request.getSession(false);
 		SecurityContextHolder.clearContext();
-		session = request.getSession(false);
-		if (session != null) {
-			session.invalidate();
-		}
 
-		if (request.getCookies() != null) {
-			for (Cookie cookie : request.getCookies()) {
-				cookie.setMaxAge(0);
-				cookie.setValue("");
-				cookie.setHttpOnly(true);
-				cookie.setPath("/");
-				response.addCookie(cookie);
-			}
-		}
+		response.addHeader(HttpHeaders.SET_COOKIE, cookieUtil.deleteAccessTokenCookie().toString());
+		response.addHeader(HttpHeaders.SET_COOKIE, cookieUtil.deleteRefreshTokenCookie().toString());
 
 		return "logout successfully";
 	}
