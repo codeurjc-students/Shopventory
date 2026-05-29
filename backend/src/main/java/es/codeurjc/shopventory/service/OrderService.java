@@ -75,6 +75,18 @@ public class OrderService {
         order.setStatus(OrderStatus.CONFIRMED);
         Order saved = orderRepository.save(order);
 
+        // For SALE orders, verify stock is still sufficient at confirmation time
+        if (order.getType() == OrderType.SALE) {
+            for (OrderItem item : order.getItems()) {
+                Product product = item.getProduct();
+                if (product.getStock() < item.getQuantity()) {
+                    throw new BadRequestException(
+                        "Insufficient stock for \"" + product.getName() + "\". " +
+                        "Available: " + product.getStock() + ", required: " + item.getQuantity());
+                }
+            }
+        }
+
         // Update stock based on order type
         for (OrderItem item : order.getItems()) {
             Product product = item.getProduct();
