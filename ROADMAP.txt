@@ -118,6 +118,9 @@ Admin1234!
 user@shopventory.com
 User1234!
 
+noreply.shopventory@gmail.com
+qjbi qrek wfxa lhdh
+
 
 cd C:\Users\alber\Desktop\Repositorio\Shopventory
 docker build -f docker/Dockerfile -t tomy014/shopventory .

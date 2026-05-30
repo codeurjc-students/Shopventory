@@ -19,6 +19,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByApprovedFalse();
 
+    @org.springframework.data.jpa.repository.Query("SELECT u FROM UserTable u JOIN u.roles r WHERE r = 'ADMIN'")
+    List<User> findAllAdmins();
+
     Page<User> findByNameContainingIgnoreCaseOrSurnameContainingIgnoreCaseOrEmailContainingIgnoreCase(
             String name, String surname, String email, Pageable pageable);
 }

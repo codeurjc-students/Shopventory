@@ -19,15 +19,17 @@ public class OrderService {
     private final ProviderRepository providerRepository;
     private final UserRepository userRepository;
     private final StockMovementService stockMovementService;
+    private final EmailService emailService;
 
     public OrderService(OrderRepository orderRepository, ProductRepository productRepository,
                         ProviderRepository providerRepository, UserRepository userRepository,
-                        StockMovementService stockMovementService) {
+                        StockMovementService stockMovementService, EmailService emailService) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.providerRepository = providerRepository;
         this.userRepository = userRepository;
         this.stockMovementService = stockMovementService;
+        this.emailService = emailService;
     }
 
     public Order create(OrderDTO dto, String creatorEmail) {
@@ -107,6 +109,15 @@ public class OrderService {
             int delta = stockAfter - stockBefore;
             stockMovementService.recordMovement(product, delta, stockBefore, stockAfter,
                     movementType, "Order #" + order.getId(), confirmer);
+
+            if (order.getType() == OrderType.SALE
+                    && stockBefore > product.getMinStockThreshold()
+                    && stockAfter <= product.getMinStockThreshold()) {
+                var adminEmails = userRepository.findAllAdmins().stream()
+                        .map(u -> u.getEmail()).toList();
+                emailService.sendLowStockAlert(adminEmails, product.getName(), product.getSku(),
+                        stockAfter, product.getMinStockThreshold());
+            }
         }
 
         return saved;

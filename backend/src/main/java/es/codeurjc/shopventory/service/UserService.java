@@ -21,10 +21,13 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
+                       EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     public UserResponseDTO register(UserRegistrationDTO dto) {
@@ -40,7 +43,9 @@ public class UserService {
         user.setPhone(dto.getPhone());
         user.getRoles().add("USER");
         user.setApproved(false);
-        return new UserResponseDTO(userRepository.save(user));
+        UserResponseDTO saved = new UserResponseDTO(userRepository.save(user));
+        emailService.sendWelcomeEmail(saved.getEmail(), saved.getName());
+        return saved;
     }
 
     @Transactional(readOnly = true)

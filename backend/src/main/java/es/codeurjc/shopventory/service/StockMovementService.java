@@ -19,13 +19,16 @@ public class StockMovementService {
     private final StockMovementRepository stockMovementRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
     public StockMovementService(StockMovementRepository stockMovementRepository,
                                 ProductRepository productRepository,
-                                UserRepository userRepository) {
+                                UserRepository userRepository,
+                                EmailService emailService) {
         this.stockMovementRepository = stockMovementRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
+        this.emailService = emailService;
     }
 
     public StockMovement manualUpdate(Long productId, StockUpdateDTO dto, String performerEmail) {
@@ -48,6 +51,13 @@ public class StockMovementService {
 
         product.setStock(stockAfter);
         productRepository.save(product);
+
+        if (stockBefore > product.getMinStockThreshold() && stockAfter <= product.getMinStockThreshold()) {
+            var adminEmails = userRepository.findAllAdmins().stream()
+                    .map(u -> u.getEmail()).toList();
+            emailService.sendLowStockAlert(adminEmails, product.getName(), product.getSku(),
+                    stockAfter, product.getMinStockThreshold());
+        }
 
         StockMovement movement = new StockMovement(
                 product, delta, stockBefore, stockAfter,
