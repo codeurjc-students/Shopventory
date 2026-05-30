@@ -64,7 +64,9 @@
             <tr *ngFor="let p of page.content">
               <td><span class="font-monospace small">{{ p.sku || '—' }}</span></td>
               <td>
-                <strong>{{ p.name }}</strong>
+                <a [routerLink]="['/products', p.id]" class="text-decoration-none text-body">
+                  <strong>{{ p.name }}</strong>
+                </a>
                 <div class="text-muted small">{{ p.descriptionShort }}</div>
               </td>
               <td>

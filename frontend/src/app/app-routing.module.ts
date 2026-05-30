@@ -16,9 +16,12 @@ import { OrderFormComponent } from './features/orders/order-form/order-form.comp
 import { OrderDetailComponent } from './features/orders/order-detail/order-detail.component';
 import { ProviderListComponent } from './features/providers/provider-list/provider-list.component';
 import { ProviderFormComponent } from './features/providers/provider-form/provider-form.component';
+import { ProviderDetailComponent } from './features/providers/provider-detail/provider-detail.component';
 import { UserListComponent } from './features/users/user-list/user-list.component';
+import { UserDetailComponent } from './features/users/user-detail/user-detail.component';
 import { EmployeeListComponent } from './features/employees/employee-list/employee-list.component';
 import { EmployeeFormComponent } from './features/employees/employee-form/employee-form.component';
+import { EmployeeDetailComponent } from './features/employees/employee-detail/employee-detail.component';
 import { NotFoundComponent } from './shared/error-pages/not-found/not-found.component';
 import { ForbiddenComponent } from './shared/error-pages/forbidden/forbidden.component';
 import { ServerErrorComponent } from './shared/error-pages/server-error/server-error.component';
@@ -47,11 +50,14 @@ const routes: Routes = [
       { path: 'orders/:id', component: OrderDetailComponent },
       { path: 'providers', component: ProviderListComponent },
       { path: 'providers/new', component: ProviderFormComponent, canActivate: [AdminGuard] },
+      { path: 'providers/:id', component: ProviderDetailComponent },
       { path: 'providers/:id/edit', component: ProviderFormComponent, canActivate: [AdminGuard] },
       { path: 'employees', component: EmployeeListComponent, canActivate: [AdminGuard] },
       { path: 'employees/new', component: EmployeeFormComponent, canActivate: [AdminGuard] },
+      { path: 'employees/:id', component: EmployeeDetailComponent, canActivate: [AdminGuard] },
       { path: 'employees/:id/edit', component: EmployeeFormComponent, canActivate: [AdminGuard] },
       { path: 'users', component: UserListComponent, canActivate: [AdminGuard] },
+      { path: 'users/:id', component: UserDetailComponent, canActivate: [AdminGuard] },
     ]
   },
   { path: '**', component: NotFoundComponent }

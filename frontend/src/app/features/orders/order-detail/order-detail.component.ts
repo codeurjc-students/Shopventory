@@ -37,6 +37,14 @@ export class OrderDetailComponent implements OnInit {
     });
   }
 
+  deliver(): void {
+    if (!this.order) return;
+    this.orderService.deliver(this.order.id).subscribe({
+      next: o => { this.order = o; this.actionError = ''; },
+      error: err => { this.actionError = err.error?.error || 'Could not mark order as delivered.'; }
+    });
+  }
+
   cancel(): void {
     if (!this.order || !confirm('Cancel this order?')) return;
     this.orderService.cancel(this.order.id).subscribe({

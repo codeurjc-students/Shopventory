@@ -26,9 +26,12 @@ import { OrderFormComponent } from './features/orders/order-form/order-form.comp
 import { OrderDetailComponent } from './features/orders/order-detail/order-detail.component';
 import { ProviderListComponent } from './features/providers/provider-list/provider-list.component';
 import { ProviderFormComponent } from './features/providers/provider-form/provider-form.component';
+import { ProviderDetailComponent } from './features/providers/provider-detail/provider-detail.component';
 import { UserListComponent } from './features/users/user-list/user-list.component';
+import { UserDetailComponent } from './features/users/user-detail/user-detail.component';
 import { EmployeeListComponent } from './features/employees/employee-list/employee-list.component';
 import { EmployeeFormComponent } from './features/employees/employee-form/employee-form.component';
+import { EmployeeDetailComponent } from './features/employees/employee-detail/employee-detail.component';
 
 @NgModule({
   declarations: [
@@ -50,9 +53,12 @@ import { EmployeeFormComponent } from './features/employees/employee-form/employ
     OrderDetailComponent,
     ProviderListComponent,
     ProviderFormComponent,
+    ProviderDetailComponent,
     UserListComponent,
+    UserDetailComponent,
     EmployeeListComponent,
-    EmployeeFormComponent
+    EmployeeFormComponent,
+    EmployeeDetailComponent
   ],
   imports: [
     BrowserModule,

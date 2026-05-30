@@ -132,6 +132,16 @@ public class OrderService {
         return new PageResponse<>(orderRepository.findByCreatedById(userId, pageable));
     }
 
+    public Order deliver(Long id) {
+        Order order = getOrderOrThrow(id);
+        if (order.getStatus() != OrderStatus.CONFIRMED) {
+            throw new BadRequestException("Only confirmed orders can be marked as delivered");
+        }
+        order.setStatus(OrderStatus.DELIVERED);
+        order.setDeliveryDate(java.time.LocalDate.now());
+        return orderRepository.save(order);
+    }
+
     public Order cancel(Long id) {
         Order order = getOrderOrThrow(id);
         if (order.getStatus() == OrderStatus.DELIVERED) {

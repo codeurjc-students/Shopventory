@@ -39,16 +39,23 @@
           </thead>
           <tbody>
             <tr *ngFor="let emp of page.content">
-              <td>{{ emp.name }} {{ emp.surname }}</td>
+              <td>
+                <a [routerLink]="['/employees', emp.id]" class="text-decoration-none text-body">
+                  {{ emp.name }} {{ emp.surname }}
+                </a>
+              </td>
               <td>{{ emp.email }}</td>
               <td>{{ emp.phone || '-' }}</td>
               <td>{{ emp.position }}</td>
               <td>{{ emp.hireDate | date:'mediumDate' }}</td>
               <td>
-                <a [routerLink]="['/employees', emp.id, 'edit']" class="btn btn-sm btn-outline-primary me-1">
+                <a [routerLink]="['/employees', emp.id]" class="btn btn-sm btn-outline-primary me-1" title="View details">
+                  <i class="bi bi-eye"></i>
+                </a>
+                <a [routerLink]="['/employees', emp.id, 'edit']" class="btn btn-sm btn-outline-secondary me-1">
                   <i class="bi bi-pencil"></i>
                 </a>
-                <button class="btn btn-sm btn-outline-danger" (click)="delete(emp.id)">
+                <button type="button" class="btn btn-sm btn-outline-danger" (click)="delete(emp.id)">
                   <i class="bi bi-trash"></i>
                 </button>
               </td>

@@ -28,6 +28,10 @@ export class OrderService {
     return this.http.post<Order>(`${this.base}/${id}/confirm`, {});
   }
 
+  deliver(id: number): Observable<Order> {
+    return this.http.post<Order>(`${this.base}/${id}/deliver`, {});
+  }
+
   cancel(id: number): Observable<Order> {
     return this.http.post<Order>(`${this.base}/${id}/cancel`, {});
   }

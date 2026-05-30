@@ -24,7 +24,11 @@
           </thead>
           <tbody>
             <tr *ngFor="let u of page.content">
-              <td><strong>{{ u.name }} {{ u.surname }}</strong></td>
+              <td>
+                <a [routerLink]="['/users', u.id]" class="text-decoration-none text-body">
+                  <strong>{{ u.name }} {{ u.surname }}</strong>
+                </a>
+              </td>
               <td>{{ u.email }}</td>
               <td>
                 <span *ngFor="let r of u.roles" class="badge me-1"
@@ -42,6 +46,9 @@
               </td>
               <td>{{ u.createdAt | date:'dd/MM/yyyy' }}</td>
               <td class="text-nowrap">
+                <a [routerLink]="['/users', u.id]" class="btn btn-sm btn-outline-primary me-1" title="View details">
+                  <i class="bi bi-eye"></i>
+                </a>
                 <button *ngIf="!u.approved" type="button" class="btn btn-sm btn-success me-1" (click)="approve(u.id)">
                   <i class="bi bi-check-lg"></i> Approve
                 </button>

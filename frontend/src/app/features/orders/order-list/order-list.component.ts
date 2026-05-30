@@ -31,6 +31,10 @@ export class OrderListComponent implements OnInit {
     this.orderService.confirm(id).subscribe({ next: () => this.load() });
   }
 
+  deliver(id: number): void {
+    this.orderService.deliver(id).subscribe({ next: () => this.load() });
+  }
+
   cancel(id: number): void {
     if (!confirm('Cancel this order?')) return;
     this.orderService.cancel(id).subscribe({ next: () => this.load() });

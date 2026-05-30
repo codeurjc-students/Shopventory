@@ -24,15 +24,19 @@
         <small class="text-muted">Created: {{ order.orderDate | date:'dd/MM/yyyy HH:mm' }}</small>
       </div>
       <div class="d-flex gap-2 flex-wrap">
-        <button *ngIf="auth.isAdmin() && order.status==='PENDING'"
+        <button type="button" *ngIf="auth.isAdmin() && order.status==='PENDING'"
                 class="btn btn-success btn-sm" (click)="confirm()">
           <i class="bi bi-check-lg me-1"></i>Confirm
         </button>
-        <button *ngIf="order.status==='PENDING'"
+        <button type="button" *ngIf="auth.isAdmin() && order.status==='CONFIRMED'"
+                class="btn btn-primary btn-sm" (click)="deliver()">
+          <i class="bi bi-truck me-1"></i>Mark as Delivered
+        </button>
+        <button type="button" *ngIf="order.status==='PENDING'"
                 class="btn btn-outline-warning btn-sm" (click)="cancel()">
           <i class="bi bi-x-lg me-1"></i>Cancel
         </button>
-        <button *ngIf="auth.isAdmin()"
+        <button type="button" *ngIf="auth.isAdmin()"
                 class="btn btn-outline-danger btn-sm" (click)="delete()">
           <i class="bi bi-trash me-1"></i>Delete
         </button>
@@ -150,7 +154,7 @@
                 </span>
               </dd>
               <dt class="col-6">Items</dt>
-              <dd class="col-6">{{ order.items?.length || 0 }}</dd>
+              <dd class="col-6">{{ order.items.length }}</dd>
               <dt class="col-6">Discount</dt>
               <dd class="col-6">{{ order.discount }}%</dd>
               <dt class="col-6 border-top pt-2">Total</dt>

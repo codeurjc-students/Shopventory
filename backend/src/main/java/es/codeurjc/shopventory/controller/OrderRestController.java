@@ -99,6 +99,23 @@ public class OrderRestController {
         return ResponseEntity.ok(orderService.confirm(id, userDetails.getUsername()));
     }
 
+    @Operation(summary = "Mark a confirmed order as delivered and set delivery date to today (Admin only)")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Order marked as delivered",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Order.class))),
+        @ApiResponse(responseCode = "400", description = "Order is not in CONFIRMED status",
+            content = @Content),
+        @ApiResponse(responseCode = "403", description = "Admin role required",
+            content = @Content),
+        @ApiResponse(responseCode = "404", description = "Order not found",
+            content = @Content)
+    })
+    @PostMapping("/{id}/deliver")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Order> deliver(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.deliver(id));
+    }
+
     @Operation(summary = "Cancel an order")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Order cancelled",
