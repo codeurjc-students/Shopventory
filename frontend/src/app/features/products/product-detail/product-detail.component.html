@@ -3,11 +3,6 @@
   <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
   <div *ngIf="product">
-    <div *ngIf="product.hasImage" class="mb-4">
-      <img [src]="productService.getImageUrl(product.id)" [alt]="product.name"
-           [title]="product.name" class="rounded shadow-sm product-image">
-    </div>
-
     <div class="d-flex justify-content-between align-items-start mb-4">
       <div>
         <h2>{{ product.name }}</h2>
@@ -46,10 +41,16 @@
           </div>
         </div>
 
-        <div class="card" *ngIf="product.description">
+        <div class="card mb-3" *ngIf="product.description">
           <div class="card-body">
             <h5 class="card-title">Description</h5>
             <p class="mb-0">{{ product.description }}</p>
+          </div>
+        </div>
+
+        <div *ngIf="product.hasImage" class="card">
+          <div class="card-body text-center">
+            <img [src]="productService.getImageUrl(product.id)" [alt]="product.name" [title]="product.name" class="rounded product-image">
           </div>
         </div>
       </div>
