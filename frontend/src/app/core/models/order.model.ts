@@ -20,6 +20,7 @@ export interface Order {
   totalAmount: number;
   customerName?: string;
   customerEmail?: string;
+  provider?: { id: number; name: string; email?: string; phoneNumber?: string; contactPerson?: string };
   items: OrderItem[];
 }
 

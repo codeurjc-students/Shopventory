@@ -13,6 +13,7 @@ import { ProductFormComponent } from './features/products/product-form/product-f
 import { ProductDetailComponent } from './features/products/product-detail/product-detail.component';
 import { OrderListComponent } from './features/orders/order-list/order-list.component';
 import { OrderFormComponent } from './features/orders/order-form/order-form.component';
+import { OrderDetailComponent } from './features/orders/order-detail/order-detail.component';
 import { ProviderListComponent } from './features/providers/provider-list/provider-list.component';
 import { ProviderFormComponent } from './features/providers/provider-form/provider-form.component';
 import { UserListComponent } from './features/users/user-list/user-list.component';
@@ -43,6 +44,7 @@ const routes: Routes = [
       { path: 'products/:id/edit', component: ProductFormComponent, canActivate: [AdminGuard] },
       { path: 'orders', component: OrderListComponent },
       { path: 'orders/new', component: OrderFormComponent },
+      { path: 'orders/:id', component: OrderDetailComponent },
       { path: 'providers', component: ProviderListComponent },
       { path: 'providers/new', component: ProviderFormComponent, canActivate: [AdminGuard] },
       { path: 'providers/:id/edit', component: ProviderFormComponent, canActivate: [AdminGuard] },

@@ -52,6 +52,10 @@
               <td>{{ o.items?.length || 0 }}</td>
               <td>{{ o.totalAmount | currency:'EUR' }}</td>
               <td>
+                <a [routerLink]="['/orders', o.id]" class="btn btn-sm btn-outline-secondary me-1"
+                   title="View details">
+                  <i class="bi bi-eye"></i>
+                </a>
                 <button *ngIf="auth.isAdmin() && o.status==='PENDING'"
                         class="btn btn-sm btn-success me-1" (click)="confirm(o.id)">
                   <i class="bi bi-check-lg"></i>
