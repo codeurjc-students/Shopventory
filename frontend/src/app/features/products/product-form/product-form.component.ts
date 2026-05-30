@@ -7,7 +7,8 @@ import { Provider } from '../../../core/models/provider.model';
 
 @Component({
   selector: 'app-product-form',
-  templateUrl: './product-form.component.html'
+  templateUrl: './product-form.component.html',
+  styleUrls: ['./product-form.component.css']
 })
 export class ProductFormComponent implements OnInit {
   form: FormGroup;
@@ -17,6 +18,11 @@ export class ProductFormComponent implements OnInit {
   loading = false;
   error = '';
   categoriesInput = '';
+
+  currentHasImage = false;
+  removeImage = false;
+  selectedFile: File | null = null;
+  imagePreviewUrl: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -55,8 +61,39 @@ export class ProductFormComponent implements OnInit {
           providerIds: p.providers?.map(pr => pr.id) ?? []
         });
         this.categoriesInput = p.categories?.join(', ') || '';
+        this.currentHasImage = p.hasImage ?? false;
       });
     }
+  }
+
+  onFileChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    this.selectedFile = file;
+    this.removeImage = false;
+    const reader = new FileReader();
+    reader.onload = e => this.imagePreviewUrl = e.target?.result as string;
+    reader.readAsDataURL(file);
+  }
+
+  clearFileSelection(): void {
+    this.selectedFile = null;
+    this.imagePreviewUrl = null;
+  }
+
+  markRemoveImage(): void {
+    this.removeImage = true;
+    this.selectedFile = null;
+    this.imagePreviewUrl = null;
+  }
+
+  undoRemoveImage(): void {
+    this.removeImage = false;
+  }
+
+  get existingImageUrl(): string {
+    return this.productService.getImageUrl(this.productId!);
   }
 
   submit(): void {
@@ -69,8 +106,24 @@ export class ProductFormComponent implements OnInit {
       ? this.productService.update(this.productId!, dto)
       : this.productService.create(dto);
     obs.subscribe({
-      next: () => this.router.navigate(['/products']),
+      next: product => this.handleImageAfterSave(product.id),
       error: err => { this.error = err.error?.error || 'Save failed'; this.loading = false; }
     });
+  }
+
+  private handleImageAfterSave(id: number): void {
+    if (this.selectedFile) {
+      this.productService.uploadImage(id, this.selectedFile).subscribe({
+        next: () => this.router.navigate(['/products', id]),
+        error: () => this.router.navigate(['/products', id])
+      });
+    } else if (this.removeImage) {
+      this.productService.deleteImage(id).subscribe({
+        next: () => this.router.navigate(['/products', id]),
+        error: () => this.router.navigate(['/products', id])
+      });
+    } else {
+      this.router.navigate(['/products', id]);
+    }
   }
 }

@@ -1,13 +1,14 @@
 package es.codeurjc.shopventory.service;
 
-import jakarta.mail.internet.MimeMessage;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import jakarta.mail.internet.MimeMessage;
 
 @Service
 public class EmailService {
@@ -81,7 +82,7 @@ public class EmailService {
             helper.setText(htmlBody, true);
             mailSender.send(message);
         } catch (Exception e) {
-            // Log but never propagate — a mail failure must not break the main operation
+            // Log but never propagate — a mail failure must not break the main operation and continue the user flow
             org.slf4j.LoggerFactory.getLogger(EmailService.class)
                     .error("Failed to send email to {}: {}", to, e.getMessage());
         }

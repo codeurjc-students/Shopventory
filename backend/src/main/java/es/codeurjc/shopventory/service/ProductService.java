@@ -117,6 +117,12 @@ public class ProductService {
         return productRepository.save(product);
     }
 
+    public void deleteImage(Long id) {
+        Product product = getProductOrThrow(id);
+        product.setProductImage(null);
+        productRepository.save(product);
+    }
+
     @Transactional(readOnly = true)
     public byte[] getImage(Long id) throws SQLException, IOException {
         Product product = getProductOrThrow(id);

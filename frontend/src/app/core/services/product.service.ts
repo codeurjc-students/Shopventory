@@ -49,6 +49,10 @@ export class ProductService {
     return this.http.put<Product>(`${this.base}/${id}/image`, form);
   }
 
+  deleteImage(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}/image`);
+  }
+
   getImageUrl(id: number): string {
     return `${this.base}/${id}/image`;
   }

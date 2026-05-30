@@ -6,7 +6,8 @@ import { Product } from '../../../core/models/product.model';
 
 @Component({
   selector: 'app-product-detail',
-  templateUrl: './product-detail.component.html'
+  templateUrl: './product-detail.component.html',
+  styleUrls: ['./product-detail.component.css']
 })
 export class ProductDetailComponent implements OnInit {
   product: Product | null = null;
@@ -21,7 +22,7 @@ export class ProductDetailComponent implements OnInit {
     public auth: AuthService,
     private route: ActivatedRoute,
     private router: Router,
-    private productService: ProductService
+    public productService: ProductService
   ) {}
 
   ngOnInit(): void {

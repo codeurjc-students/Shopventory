@@ -153,7 +153,7 @@ public class ProductRestController {
         return new ResponseEntity<>(image, headers, HttpStatus.OK);
     }
 
-    @Operation(summary = "Upload product image (Admin only)")
+    @Operation(summary = "Upload or replace product image (Admin only)")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Image uploaded",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = Product.class))),
@@ -170,6 +170,22 @@ public class ProductRestController {
                                                 @RequestParam("file") MultipartFile file)
             throws IOException, SQLException {
         return ResponseEntity.ok(productService.updateImage(id, file));
+    }
+
+    @Operation(summary = "Delete product image (Admin only)")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Image deleted",
+            content = @Content),
+        @ApiResponse(responseCode = "403", description = "Admin role required",
+            content = @Content),
+        @ApiResponse(responseCode = "404", description = "Product not found",
+            content = @Content)
+    })
+    @DeleteMapping("/{id}/image")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteImage(@PathVariable Long id) {
+        productService.deleteImage(id);
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Manually adjust product stock")

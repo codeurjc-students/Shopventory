@@ -10,6 +10,7 @@ export interface Product {
   categories: string[];
   providers?: { id: number; name: string }[];
   lowStock: boolean;
+  hasImage: boolean;
   createdAt: string;
 }
 

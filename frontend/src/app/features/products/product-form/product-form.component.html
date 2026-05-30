@@ -52,6 +52,41 @@
           </select>
           <div class="form-text">Hold Ctrl / Cmd to select multiple providers.</div>
         </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Product Image</label>
+
+          <!-- Current image (edit mode, has image, not marked for removal, no new file) -->
+          <div *ngIf="isEdit && currentHasImage && !removeImage && !imagePreviewUrl" class="mb-2">
+            <img [src]="existingImageUrl" alt="Current product image"
+                 class="img-thumbnail d-block mb-2 image-preview">
+            <button type="button" class="btn btn-sm btn-outline-danger" (click)="markRemoveImage()">
+              <i class="bi bi-trash me-1"></i>Remove image
+            </button>
+            <span class="ms-2 text-muted small">or select a file below to replace it</span>
+          </div>
+
+          <!-- Removal notice -->
+          <div *ngIf="removeImage" class="alert alert-warning py-2 mb-2">
+            <i class="bi bi-exclamation-triangle me-1"></i>Image will be removed when you save.
+            <button type="button" class="btn btn-sm btn-link p-0 ms-2" (click)="undoRemoveImage()">Undo</button>
+          </div>
+
+          <!-- New file preview -->
+          <div *ngIf="imagePreviewUrl" class="mb-2">
+            <img [src]="imagePreviewUrl" alt="New image preview"
+                 class="img-thumbnail d-block mb-2 image-preview">
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearFileSelection()">
+              <i class="bi bi-x me-1"></i>Cancel selection
+            </button>
+          </div>
+
+          <!-- File input -->
+          <input *ngIf="!imagePreviewUrl" type="file" class="form-control" accept="image/*"
+                 title="Select product image" (change)="onFileChange($event)">
+          <div class="form-text">Optional. JPEG, PNG or WebP recommended.</div>
+        </div>
+
         <div class="d-flex gap-2">
           <button type="submit" class="btn btn-primary" [disabled]="loading">
             <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
