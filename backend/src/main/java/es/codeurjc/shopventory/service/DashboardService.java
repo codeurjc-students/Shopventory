@@ -47,6 +47,7 @@ public class DashboardService {
         stats.setTotalSalesAmount(totalSales != null ? totalSales : BigDecimal.ZERO);
 
         stats.setTopProducts(getTopProducts());
+        stats.setLowestStockProducts(getLowestStockProducts());
         stats.setCategoryDistribution(getCategoryDistribution());
 
         return stats;
@@ -64,6 +65,20 @@ public class DashboardService {
             topProducts.add(entry);
         });
         return topProducts;
+    }
+
+    private List<Map<String, Object>> getLowestStockProducts() {
+        List<Map<String, Object>> result = new ArrayList<>();
+        productRepository.findTop5ByOrderByStockAsc().forEach(p -> {
+            Map<String, Object> entry = new HashMap<>();
+            entry.put("id", p.getId());
+            entry.put("name", p.getName());
+            entry.put("stock", p.getStock());
+            entry.put("price", p.getPrice());
+            entry.put("lowStock", p.isLowStock());
+            result.add(entry);
+        });
+        return result;
     }
 
     private List<Map<String, Object>> getCategoryDistribution() {

@@ -34,6 +34,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> findTop5ByOrderByStockDesc();
 
+    List<Product> findTop5ByOrderByStockAsc();
+
     @Query("SELECT c, COUNT(p) FROM ProductTable p JOIN p.categories c GROUP BY c")
     List<Object[]> findCategoryDistribution();
 

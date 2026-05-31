@@ -16,6 +16,7 @@ public class DashboardStatsDTO {
     private long pendingPurchases;
     private BigDecimal totalSalesAmount;
     private List<Map<String, Object>> topProducts;
+    private List<Map<String, Object>> lowestStockProducts;
     private List<Map<String, Object>> categoryDistribution;
 
     public long getTotalProducts() { return totalProducts; }
@@ -47,6 +48,9 @@ public class DashboardStatsDTO {
 
     public List<Map<String, Object>> getTopProducts() { return topProducts; }
     public void setTopProducts(List<Map<String, Object>> topProducts) { this.topProducts = topProducts; }
+
+    public List<Map<String, Object>> getLowestStockProducts() { return lowestStockProducts; }
+    public void setLowestStockProducts(List<Map<String, Object>> lowestStockProducts) { this.lowestStockProducts = lowestStockProducts; }
 
     public List<Map<String, Object>> getCategoryDistribution() { return categoryDistribution; }
     public void setCategoryDistribution(List<Map<String, Object>> categoryDistribution) {

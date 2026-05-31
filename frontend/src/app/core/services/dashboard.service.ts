@@ -13,6 +13,7 @@ export interface DashboardStats {
   pendingPurchases: number;
   totalSalesAmount: number;
   topProducts: any[];
+  lowestStockProducts: any[];
   categoryDistribution: any[];
 }
 
