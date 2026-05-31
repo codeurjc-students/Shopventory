@@ -120,7 +120,9 @@
               </thead>
               <tbody>
                 <tr *ngFor="let p of stats.topProducts">
-                  <td>{{ p.name }}</td>
+                  <td>
+                    <a [routerLink]="['/products', p.id]" class="text-decoration-none text-body">{{ p.name }}</a>
+                  </td>
                   <td>{{ p.price | currency:'EUR' }}</td>
                   <td>{{ p.stock }}</td>
                   <td>
