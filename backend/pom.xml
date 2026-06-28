@@ -16,6 +16,10 @@
 	<packaging>jar</packaging>
 	<properties>
 		<java.version>21</java.version>
+		<!-- Set -DskipFrontend=true to skip the Angular build (fast backend-only
+		     runs). When skipped, the Selenium UI tests skip themselves too. -->
+		<skipFrontend>false</skipFrontend>
+		<node.version>v20.18.0</node.version>
 	</properties>
 	<dependencies>
 
@@ -122,6 +126,69 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
+			<!-- Builds the Angular SPA so it is served by the backend (and the
+			     Selenium e2e tests have a real UI to drive). Skipped when
+			     -DskipFrontend=true. -->
+			<plugin>
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<version>1.15.1</version>
+				<configuration>
+					<workingDirectory>${project.basedir}/../frontend</workingDirectory>
+					<installDirectory>${project.basedir}/../frontend</installDirectory>
+					<skip>${skipFrontend}</skip>
+				</configuration>
+				<executions>
+					<execution>
+						<id>install-node-and-npm</id>
+						<goals><goal>install-node-and-npm</goal></goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<nodeVersion>${node.version}</nodeVersion>
+						</configuration>
+					</execution>
+					<execution>
+						<id>npm-install</id>
+						<goals><goal>npm</goal></goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<arguments>install --legacy-peer-deps</arguments>
+						</configuration>
+					</execution>
+					<execution>
+						<id>npm-build</id>
+						<goals><goal>npm</goal></goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<arguments>run build -- --configuration production --base-href=/</arguments>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Copies the built Angular app into the classpath static folder so
+			     Spring Boot serves it (target/classes/static and the final jar). -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-frontend-to-static</id>
+						<phase>process-classes</phase>
+						<goals><goal>copy-resources</goal></goals>
+						<configuration>
+							<skip>${skipFrontend}</skip>
+							<outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.basedir}/../frontend/dist/shopventory/browser</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
