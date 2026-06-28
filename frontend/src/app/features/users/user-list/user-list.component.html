@@ -1,0 +1,84 @@
+<div class="container-fluid py-4">
+  <h2 class="mb-4"><i class="bi bi-people me-2"></i>Users</h2>
+
+  <div *ngIf="pending.length > 0" class="alert alert-warning d-flex align-items-center mb-4">
+    <i class="bi bi-person-exclamation me-2 fs-5"></i>
+    <div>
+      <strong>{{ pending.length }} user(s) pending approval:</strong>
+      <span *ngFor="let u of pending" class="ms-2">
+        {{ u.name }} {{ u.surname }} ({{ u.email }})
+        <button class="btn btn-sm btn-success ms-1" (click)="approve(u.id)">Approve</button>
+      </span>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  <div *ngIf="loading" class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+
+  <div *ngIf="!loading && page">
+    <div class="card border-0 shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr><th>Name</th><th>Email</th><th>Roles</th><th>Approval</th><th>Account</th><th>Joined</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of page.content">
+              <td>
+                <a [routerLink]="['/users', u.id]" class="text-decoration-none text-body">
+                  <strong>{{ u.name }} {{ u.surname }}</strong>
+                </a>
+              </td>
+              <td>{{ u.email }}</td>
+              <td>
+                <span *ngFor="let r of u.roles" class="badge me-1"
+                      [class.bg-danger]="r==='ADMIN'" [class.bg-secondary]="r!=='ADMIN'">{{ r }}</span>
+              </td>
+              <td>
+                <span class="badge" [class.bg-success]="u.approved" [class.bg-warning]="!u.approved">
+                  {{ u.approved ? 'Approved' : 'Pending' }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" [class.bg-success]="u.enabled" [class.bg-danger]="!u.enabled">
+                  {{ u.enabled ? 'Enabled' : 'Disabled' }}
+                </span>
+              </td>
+              <td>{{ u.createdAt | date:'dd/MM/yyyy' }}</td>
+              <td class="text-nowrap">
+                <a [routerLink]="['/users', u.id]" class="btn btn-sm btn-outline-primary me-1" title="View details">
+                  <i class="bi bi-eye"></i>
+                </a>
+                <button *ngIf="!u.approved" type="button" class="btn btn-sm btn-success me-1" (click)="approve(u.id)">
+                  <i class="bi bi-check-lg"></i> Approve
+                </button>
+                <button type="button" class="btn btn-sm me-1"
+                        [class.btn-outline-warning]="u.enabled"
+                        [class.btn-outline-success]="!u.enabled"
+                        [title]="u.enabled ? 'Disable account' : 'Enable account'"
+                        (click)="toggleEnabled(u.id, u.enabled)">
+                  <i class="bi" [class.bi-person-dash]="u.enabled" [class.bi-person-check]="!u.enabled"></i>
+                  {{ u.enabled ? 'Disable' : 'Enable' }}
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" title="Delete user" (click)="delete(u.id)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <small class="text-muted">{{ page.totalElements }} users</small>
+      <div class="btn-group">
+        <button class="btn btn-outline-secondary" (click)="prevPage()" [disabled]="currentPage===0">
+          <i class="bi bi-chevron-left"></i> Previous
+        </button>
+        <button class="btn btn-outline-secondary" (click)="nextPage()" [disabled]="page.last">
+          Next <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

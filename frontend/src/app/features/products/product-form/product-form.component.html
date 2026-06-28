@@ -1,0 +1,100 @@
+<div class="container py-4" style="max-width:700px">
+  <h2 class="mb-4">{{ isEdit ? 'Edit Product' : 'New Product' }}</h2>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Name *</label>
+          <input type="text" class="form-control" formControlName="name"
+                 [class.is-invalid]="form.get('name')?.invalid && form.get('name')?.touched">
+        </div>
+        <div class="row">
+          <div class="col-6 mb-3">
+            <label class="form-label fw-semibold">SKU</label>
+            <input type="text" class="form-control font-monospace" formControlName="sku">
+          </div>
+          <div class="col-6 mb-3">
+            <label class="form-label fw-semibold">Price (€) *</label>
+            <input type="number" step="0.01" class="form-control" formControlName="price">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6 mb-3">
+            <label class="form-label fw-semibold">Initial Stock</label>
+            <input type="number" class="form-control" formControlName="stock">
+          </div>
+          <div class="col-6 mb-3">
+            <label class="form-label fw-semibold">Low Stock Alert At</label>
+            <input type="number" class="form-control" formControlName="minStockThreshold">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Short Description</label>
+          <input type="text" class="form-control" formControlName="descriptionShort">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Full Description</label>
+          <textarea class="form-control" rows="3" formControlName="description"></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Categories (comma separated)</label>
+          <input type="text" class="form-control" [(ngModel)]="categoriesInput"
+                 [ngModelOptions]="{standalone: true}"
+                 placeholder="Electronics, Computers">
+        </div>
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Providers</label>
+          <select multiple class="form-select" formControlName="providerIds" style="min-height:100px">
+            <option *ngFor="let p of providers" [ngValue]="p.id">{{ p.name }}</option>
+          </select>
+          <div class="form-text">Hold Ctrl / Cmd to select multiple providers.</div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Product Image</label>
+
+          <!-- Current image (edit mode, has image, not marked for removal, no new file) -->
+          <div *ngIf="isEdit && currentHasImage && !removeImage && !imagePreviewUrl" class="mb-2">
+            <img [src]="existingImageUrl" alt="Current product image"
+                 class="img-thumbnail d-block mb-2 image-preview">
+            <button type="button" class="btn btn-sm btn-outline-danger" (click)="markRemoveImage()">
+              <i class="bi bi-trash me-1"></i>Remove image
+            </button>
+            <span class="ms-2 text-muted small">or select a file below to replace it</span>
+          </div>
+
+          <!-- Removal notice -->
+          <div *ngIf="removeImage" class="alert alert-warning py-2 mb-2">
+            <i class="bi bi-exclamation-triangle me-1"></i>Image will be removed when you save.
+            <button type="button" class="btn btn-sm btn-link p-0 ms-2" (click)="undoRemoveImage()">Undo</button>
+          </div>
+
+          <!-- New file preview -->
+          <div *ngIf="imagePreviewUrl" class="mb-2">
+            <img [src]="imagePreviewUrl" alt="New image preview"
+                 class="img-thumbnail d-block mb-2 image-preview">
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearFileSelection()">
+              <i class="bi bi-x me-1"></i>Cancel selection
+            </button>
+          </div>
+
+          <!-- File input -->
+          <input *ngIf="!imagePreviewUrl" type="file" class="form-control" accept="image/*"
+                 title="Select product image" (change)="onFileChange($event)">
+          <div class="form-text">Optional. JPEG, PNG or WebP recommended.</div>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary" [disabled]="loading">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+            {{ isEdit ? 'Save Changes' : 'Create Product' }}
+          </button>
+          <a routerLink="/products" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

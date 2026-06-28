@@ -1,0 +1,94 @@
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2><i class="bi bi-cart me-2"></i>Orders</h2>
+    <a routerLink="/orders/new" class="btn btn-primary">
+      <i class="bi bi-plus-lg me-1"></i> New Order
+    </a>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+      <div class="d-flex gap-2">
+        <button class="btn" [class.btn-primary]="typeFilter===''" [class.btn-outline-secondary]="typeFilter!=''"
+                (click)="typeFilter=''; load()">All</button>
+        <button class="btn" [class.btn-success]="typeFilter==='SALE'" [class.btn-outline-secondary]="typeFilter!=='SALE'"
+                (click)="typeFilter='SALE'; load()">Sales</button>
+        <button class="btn" [class.btn-info]="typeFilter==='PURCHASE'" [class.btn-outline-secondary]="typeFilter!=='PURCHASE'"
+                (click)="typeFilter='PURCHASE'; load()">Purchases</button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  <div *ngIf="loading" class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+
+  <div *ngIf="!loading && page">
+    <div class="card border-0 shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>#</th><th>Type</th><th>Date</th><th>Status</th><th>Items</th><th>Total</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let o of page.content">
+              <td>{{ o.id }}</td>
+              <td>
+                <span class="badge" [class.bg-success]="o.type==='SALE'" [class.bg-info]="o.type==='PURCHASE'">
+                  {{ o.type }}
+                </span>
+              </td>
+              <td>{{ o.orderDate | date:'dd/MM/yyyy' }}</td>
+              <td>
+                <span class="badge"
+                  [class.bg-warning]="o.status==='PENDING'"
+                  [class.bg-primary]="o.status==='CONFIRMED'"
+                  [class.bg-success]="o.status==='DELIVERED'"
+                  [class.bg-secondary]="o.status==='CANCELLED'">
+                  {{ o.status }}
+                </span>
+              </td>
+              <td>{{ o.items?.length || 0 }}</td>
+              <td>{{ o.totalAmount | currency:'EUR' }}</td>
+              <td>
+                <a [routerLink]="['/orders', o.id]" class="btn btn-sm btn-outline-secondary me-1"
+                   title="View details">
+                  <i class="bi bi-eye"></i>
+                </a>
+                <button type="button" *ngIf="auth.isAdmin() && o.status==='PENDING'"
+                        class="btn btn-sm btn-success me-1" (click)="confirm(o.id)" title="Confirm">
+                  <i class="bi bi-check-lg"></i>
+                </button>
+                <button type="button" *ngIf="auth.isAdmin() && o.status==='CONFIRMED'"
+                        class="btn btn-sm btn-primary me-1" (click)="deliver(o.id)" title="Mark as delivered">
+                  <i class="bi bi-truck"></i>
+                </button>
+                <button type="button" *ngIf="o.status==='PENDING'"
+                        class="btn btn-sm btn-outline-warning me-1" (click)="cancel(o.id)" title="Cancel">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+                <button type="button" *ngIf="auth.isAdmin()"
+                        class="btn btn-sm btn-outline-danger" (click)="delete(o.id)" title="Delete">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <small class="text-muted">{{ page.totalElements }} total orders</small>
+      <div class="btn-group">
+        <button type="button" class="btn btn-outline-secondary" (click)="prevPage()" [disabled]="currentPage===0">
+          <i class="bi bi-chevron-left"></i> Previous
+        </button>
+        <button type="button" class="btn btn-outline-secondary" (click)="nextPage()" [disabled]="page.last">
+          Next <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

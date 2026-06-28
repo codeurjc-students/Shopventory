@@ -1,0 +1,5 @@
+.image-preview {
+  max-height: 180px;
+  max-width: 100%;
+  object-fit: contain;
+}

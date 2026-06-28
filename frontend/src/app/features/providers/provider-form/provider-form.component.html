@@ -1,0 +1,51 @@
+<div class="container py-4" style="max-width:640px">
+  <h2 class="mb-4">{{ isEdit ? 'Edit Provider' : 'New Provider' }}</h2>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="row g-3">
+      <div class="col-12">
+        <label class="form-label">Name *</label>
+        <input formControlName="name" class="form-control"
+               [class.is-invalid]="form.get('name')?.invalid && form.get('name')?.touched">
+        <div class="invalid-feedback">Required.</div>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Contact Person</label>
+        <input formControlName="contactPerson" class="form-control">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Email</label>
+        <input type="email" formControlName="email" class="form-control"
+               [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched">
+        <div class="invalid-feedback">Invalid email.</div>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Phone</label>
+        <input formControlName="phoneNumber" class="form-control">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Website</label>
+        <input formControlName="website" class="form-control" placeholder="https://...">
+      </div>
+      <div class="col-12">
+        <label class="form-label">Address</label>
+        <input formControlName="address" class="form-control">
+      </div>
+      <div class="col-12">
+        <label class="form-label">Types <span class="text-muted">(comma-separated)</span></label>
+        <input class="form-control" [(ngModel)]="typesInput" [ngModelOptions]="{standalone: true}"
+               placeholder="e.g. Electronics, Hardware">
+      </div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+      <button type="submit" class="btn btn-primary" [disabled]="loading">
+        <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"></span>
+        {{ isEdit ? 'Update' : 'Create' }}
+      </button>
+      <a routerLink="/providers" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+  </form>
+</div>

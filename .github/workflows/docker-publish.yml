@@ -1,0 +1,54 @@
+name: Build & Publish Docker image
+
+# Builds the image and publishes it to Docker Hub.
+# IMPORTANT: secrets (mail App Password, JWT, etc.) are NOT baked into the
+# image. They are injected at RUNTIME as environment variables when the
+# container starts (docker-compose / deployment server). The image must stay
+# free of credentials.
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Docker Hub credentials stored as repository secrets:
+      #   Settings > Secrets and variables > Actions > New repository secret
+      #     - DOCKERHUB_USERNAME
+      #     - DOCKERHUB_TOKEN   (a Docker Hub Access Token, not the password)
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/shopventory:latest
+
+# --- How runtime secrets are used at deploy time ---
+# The app needs its secrets AT RUNTIME, not when building the image. Required:
+# JWT_SECRET and DB_PASSWORD; optional: MAIL_PASSWORD / MAIL_USERNAME.
+# Wherever you run the container (your machine with docker-compose, or a deploy
+# job over SSH), pass them as environment variables read from secrets:
+#
+#   docker run -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+#              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+#              -e MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} ...
+#   # or with docker-compose, providing them via docker/.env before "up -d"
+#
+# This way the credentials live only in GitHub secrets / the host environment,
+# never in the source code nor in the published image.

@@ -1,0 +1,125 @@
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2><i class="bi bi-box me-2"></i>Products</h2>
+    <a *ngIf="auth.isAdmin()" routerLink="/products/new" class="btn btn-primary">
+      <i class="bi bi-plus-lg me-1"></i> Add Product
+    </a>
+  </div>
+
+  <!-- Search / filter -->
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+      <div class="row g-2">
+        <div class="col-md-4">
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search by name, SKU..."
+                   [(ngModel)]="searchTerm" (keyup.enter)="search()">
+            <button class="btn btn-outline-secondary" (click)="search()">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <input type="text" class="form-control" placeholder="Filter by category..."
+                 [(ngModel)]="categoryFilter" (keyup.enter)="search()">
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" [(ngModel)]="providerFilter" (change)="search()">
+            <option [ngValue]="null">All providers</option>
+            <option *ngFor="let p of providers" [ngValue]="p.id">{{ p.name }}</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-outline-secondary w-100" (click)="clearFilters()">
+            <i class="bi bi-x-circle me-1"></i>Clear
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary"></div>
+  </div>
+
+  <div *ngIf="!loading && page">
+    <div class="card border-0 shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>SKU</th>
+              <th>Name</th>
+              <th>Providers</th>
+              <th>Categories</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of page.content">
+              <td><span class="font-monospace small">{{ p.sku || '—' }}</span></td>
+              <td>
+                <a [routerLink]="['/products', p.id]" class="text-decoration-none text-body">
+                  <strong>{{ p.name }}</strong>
+                </a>
+                <div class="text-muted small">{{ p.descriptionShort }}</div>
+              </td>
+              <td>
+                <span *ngFor="let pr of p.providers" class="badge bg-info text-dark me-1">{{ pr.name }}</span>
+                <span *ngIf="!p.providers || p.providers.length === 0" class="text-muted small">—</span>
+              </td>
+              <td>
+                <span *ngFor="let c of p.categories" class="badge bg-secondary me-1">{{ c }}</span>
+              </td>
+              <td>{{ p.price | currency:'EUR' }}</td>
+              <td>{{ p.stock }}</td>
+              <td>
+                <span class="badge" [class.bg-danger]="p.lowStock" [class.bg-success]="!p.lowStock">
+                  {{ p.lowStock ? 'Low Stock' : 'In Stock' }}
+                </span>
+              </td>
+              <td>
+                <a [routerLink]="['/products', p.id]" class="btn btn-sm btn-outline-primary me-1">
+                  <i class="bi bi-eye"></i>
+                </a>
+                <a *ngIf="auth.isAdmin()" [routerLink]="['/products', p.id, 'edit']"
+                   class="btn btn-sm btn-outline-secondary me-1">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <button *ngIf="auth.isAdmin()" class="btn btn-sm btn-outline-danger" (click)="delete(p.id)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <small class="text-muted">
+        Showing {{ page.page * page.size + 1 }}–{{ page.page * page.size + page.content.length }}
+        of {{ page.totalElements }} products
+      </small>
+      <div class="btn-group">
+        <button class="btn btn-outline-secondary" (click)="prevPage()" [disabled]="currentPage === 0">
+          <i class="bi bi-chevron-left"></i> Previous
+        </button>
+        <button class="btn btn-outline-secondary" (click)="nextPage()" [disabled]="page.last">
+          Next <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && page?.content?.length === 0" class="text-center py-5 text-muted">
+    <i class="bi bi-box fs-1"></i>
+    <p class="mt-2">No products found.</p>
+  </div>
+</div>
