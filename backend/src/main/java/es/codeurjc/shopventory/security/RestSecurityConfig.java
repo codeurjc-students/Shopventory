@@ -20,6 +20,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import es.codeurjc.shopventory.security.jwt.JwtRequestFilter;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 import java.util.List;
 
 @Configuration
@@ -61,6 +63,12 @@ public class RestSecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            // Unauthenticated requests -> 401 (frontend redirects to /login).
+            // Authenticated-but-forbidden requests keep the default 403
+            // (frontend shows the /403 page).
+            .exceptionHandling(ex -> ex.authenticationEntryPoint(
+                (request, response, authException) ->
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")))
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints
                 .requestMatchers("/api/auth/login", "/api/auth/register",

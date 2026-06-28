@@ -10,6 +10,39 @@
   - README.md                                        (write at end, in Spanish)
 ================================================================
 
+================================================================
+  SECURITY - secret rotation (DO THIS, in order)
+================================================================
+  [ ] 1. REVOKE the leaked Gmail App Password (the one ending in ...lhdh).
+         Google Account > Security > App passwords. Generate a NEW one.
+         Do NOT paste the new password anywhere inside the repo.
+  [ ] 2. Create the local env file (gitignored):
+            cp docker/.env.example docker/.env
+         Edit docker/.env and set:
+            - MAIL_PASSWORD  -> the NEW Gmail App Password (16 chars, no spaces)
+            - JWT_SECRET     -> the new strong value (see below)
+            - DB_PASSWORD    -> a strong DB password of your choice
+         docker-compose now FAILS to start if JWT_SECRET / DB_PASSWORD are missing.
+  [ ] 3. Add GitHub repository secrets
+         (Settings > Secrets and variables > Actions):
+            - DOCKERHUB_USERNAME   (Docker Hub user: tomy014)
+            - DOCKERHUB_TOKEN      (Docker Hub Access Token, not the password)
+            - MAIL_PASSWORD        (the NEW App Password, for deploy/CI)
+            - JWT_SECRET           (same value you put in docker/.env)
+            - DB_PASSWORD          (same value you put in docker/.env)
+  [ ] 4. Rebuild & push a CLEAN image (current public image still has the old
+         secrets baked in):
+            docker build -f docker/Dockerfile -t tomy014/shopventory .
+            docker push tomy014/shopventory
+  [ ] 5. (Optional, bigger task) The TLS keystore (backend/.../keystore.jks) is
+         committed AND its password defaults to "password". Since the keystore
+         file itself is public, the cert/private key are compromised. To fix
+         properly: regenerate keystore.jks with a strong password, stop tracking
+         it in git, and inject KEYSTORE_PASSWORD via env. Low risk for a
+         self-signed educational cert, but worth noting.
+
+================================================================
+
 
 
 
