@@ -7,10 +7,7 @@
 ================================================================
   PENDING (not implemented)
 ================================================================
-  - OpenAPI docs  → backend/api-docs/api-docs.yaml  (generate at end)
   - README.md                                        (write at end, in Spanish)
-  - Email alerts for low stock                       (future feature)
-  - Full Bootstrap styling polish                    (future feature)
 ================================================================
 
 
@@ -63,54 +60,6 @@ Páginas de error
 
 
 
-================================================================
-  BUGS PENDIENTES DE CORREGIR  (detectados por code-review)
-================================================================
-
-[RESUELTO] Stock negativo al confirmar pedido
- Fichero: OrderService.java  (método confirm(), ~línea 89)
- Al confirmar una venta, no se comprueba si hay stock suficiente
- en ese momento. Si el stock bajó entre la creación y la
- confirmación, el resultado puede ser stock negativo sin error.
-
-[RESUELTO] Auditoría de stock incorrecta en ventas confirmadas
- Fichero: OrderService.java  (método confirm(), ~línea 95)
- El movimiento de stock de una venta se registra con delta
- positivo en lugar de negativo, corrompiendo el historial.
-
-[RESUELTO] Login no emite cookies cuando access token válido + refresh expirado
- Fichero: UserLoginService.java  (~líneas 54-71)
- Si el access token aún es válido pero el refresh ha expirado,
- ninguna rama del if-else encaja y la respuesta sale sin
- Set-Cookie, dejando la sesión rota tras autenticarse.
-
-[RESUELTO] Cookies JWT sin atributos Secure ni SameSite
- Fichero: JwtCookieManager.java  (línea 15)
- Las cookies se crean solo con httpOnly. Sin Secure los tokens
- viajan en texto plano por HTTP. Sin SameSite el app es
- vulnerable a CSRF (csrf.disable() está activo).
-
-[RESUELTO] Logout no borra el RefreshToken correctamente
- Fichero: JwtCookieManager.java  (falta método deleteRefreshTokenCookie)
-           UserLoginService.java  (método logout)
- No existe deleteRefreshTokenCookie(). El bucle de logout usa
- la API antigua de servlet que puede no coincidir con las cookies
- creadas por ResponseCookie, dejando el RefreshToken activo.
-
-[MEDIO] Editar producto borra el SKU si el formulario no lo envía
- Fichero: ProductService.java  (mapDtoToProduct, línea 132)
- En un PUT, si el DTO no incluye el campo sku (o llega vacío),
- el SKU existente se sobrescribe con null sin ningún error.
-
-[BAJO] AdminGuard no verifica isApproved()
- Fichero: frontend/src/app/core/guards/admin.guard.ts  (línea 13)
- El guard solo comprueba el rol ADMIN, no si la cuenta está
- aprobada. Cualquier ruta futura con solo AdminGuard (sin el
- AuthGuard padre) permitiría acceso a cuentas no aprobadas.
-
-================================================================
-
-
 
 admin@shopventory.com
 Admin1234!
@@ -131,3 +80,9 @@ docker push tomy014/shopventory
 cd docker
 docker-compose down -v
 docker-compose up -d
+
+# Quick redeploy when ONLY docker/.env changed (no code change):
+#   cd docker
+#   docker-compose down -v
+#   docker-compose up -d
+# (no build/push needed in that case)

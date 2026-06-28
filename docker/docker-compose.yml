@@ -7,9 +7,15 @@ services:
     environment:
       - DATABASE_URL=jdbc:mysql://db:3306/shopventory
       - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-password}
+      # Required secrets: read from the local .env (untracked) or the shell.
+      # The ":?" form makes "docker-compose up" fail fast if they are not set,
+      # so no secret is ever silently defaulted in a deployment.
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?set DB_PASSWORD in docker/.env}
       - SPRING_JPA_HIBERNATE_DDL-AUTO=update
-      - JWT_SECRET=${JWT_SECRET:-shopventoryJwtSecret2024ChangeMe!}
+      - JWT_SECRET=${JWT_SECRET:?set JWT_SECRET in docker/.env}
+      # Mail credentials: optional. If not provided, email sending is disabled.
+      - MAIL_USERNAME=${MAIL_USERNAME:-}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
     depends_on:
       db:
         condition: service_healthy
@@ -19,7 +25,7 @@ services:
     image: mysql:8.0.32
     container_name: shopventory-db
     environment:
-      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-password}
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:?set DB_PASSWORD in docker/.env}
       - MYSQL_DATABASE=shopventory
     ports:
       - "3307:3306"

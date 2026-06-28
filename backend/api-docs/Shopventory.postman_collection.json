@@ -1,0 +1,1596 @@
+{
+  "info": {
+    "name": "Shopventory REST API",
+    "_postman_id": "b1c2d3e4-5f6a-7b8c-9d0e-shopventory01",
+    "description": "Colección completa de la API REST de Shopventory (TFG).\n\n## Puesta en marcha\n1. Arranca el backend (Spring Boot) en `https://localhost:8443`.\n2. **Importante:** el servidor usa HTTPS con un certificado autofirmado. En Postman ve a *Settings → General* y **desactiva 'SSL certificate verification'** (o añade una excepción), o las peticiones fallarán.\n3. Ejecuta **Authentication → Login (admin)**. Postman almacenará las cookies `AuthToken` y `RefreshToken` (HttpOnly) en su *cookie jar* y las reenviará automáticamente en el resto de peticiones — no necesitas copiar ningún token a mano.\n4. Lanza el resto de peticiones. Las que crean recursos (Crear producto, proveedor, pedido, empleado, registrar usuario) guardan el `id` devuelto en una variable de colección (`createdProductId`, etc.) que usan las peticiones de borrado.\n\n## Autenticación\nJWT en cookies HttpOnly (`AuthToken` / `RefreshToken`). Roles `ADMIN` y `USER`. Las credenciales de ejemplo están en las variables de la colección:\n- Admin: `admin@shopventory.com` / `Admin1234!`\n- Usuario: `user@shopventory.com` / `User1234!`\n\n## Paginación\nLos listados aceptan `page`, `size` y `sort` (p. ej. `sort=name,asc`) como parámetros de query.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "Login, logout, refresco de token y registro.\n\n**Ejecuta primero `Login (admin)`**: Postman guardará las cookies `AuthToken` y `RefreshToken` y las reutilizará en el resto de peticiones.",
+      "item": [
+        {
+          "name": "Login (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://localhost:443/api/auth/login",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{adminUsername}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Inicia sesión con el usuario administrador de ejemplo. Las credenciales se toman de las variables de la colección (admin@shopventory.com / Admin1234!)."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login correcto (200)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Cookies de sesión recibidas\", function () {",
+                  "    pm.expect(pm.cookies.has(\"AuthToken\")).to.be.true;",
+                  "});",
+                  "console.log('Sesion iniciada. Postman usara las cookies automaticamente en el resto de peticiones.');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login (usuario estándar)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://localhost:443/api/auth/login",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{userUsername}}\",\n  \"password\": \"{{userPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Inicia sesión con un usuario sin rol de administrador (user@shopventory.com / User1234!). Útil para comprobar las restricciones 403 de los endpoints solo-admin."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login correcto (200)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Cookies de sesión recibidas\", function () {",
+                  "    pm.expect(pm.cookies.has(\"AuthToken\")).to.be.true;",
+                  "});",
+                  "console.log('Sesion iniciada. Postman usara las cookies automaticamente en el resto de peticiones.');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Usuario actual (me)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/auth/me",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Devuelve los datos del usuario autenticado en la sesión actual."
+          },
+          "response": []
+        },
+        {
+          "name": "Refrescar token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/auth/refresh",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Genera un nuevo AuthToken a partir de la cookie RefreshToken existente."
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar nuevo usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://localhost:443/api/auth/register",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nuevo.usuario@shopventory.com\",\n  \"password\": \"Nuevo1234!\",\n  \"name\": \"Nuevo\",\n  \"surname\": \"Usuario\",\n  \"phone\": \"+34 600 123 456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Registra una cuenta nueva (queda pendiente de aprobación por un administrador). Guarda el id devuelto en la variable `createdUserId`."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "    try {",
+                  "        var data = pm.response.json();",
+                  "        if (data && data.id !== undefined) {",
+                  "            pm.collectionVariables.set(\"createdUserId\", data.id);",
+                  "            console.log(\"Guardado createdUserId =\", data.id);",
+                  "        }",
+                  "    } catch (e) { /* respuesta sin cuerpo JSON */ }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/auth/logout",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Cierra la sesión y limpia las cookies AuthToken / RefreshToken."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users (Admin)",
+      "description": "Gestión de usuarios. Todos los endpoints requieren rol ADMIN (ejecuta `Login (admin)`).",
+      "item": [
+        {
+          "name": "Listar usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/users?page=0&size=10",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "laura",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "id,desc",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lista paginada de usuarios. El parámetro opcional `search` filtra por nombre, apellido o email."
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener usuario por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/users/{{userId}}",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://localhost:443/api/users/{{userId}}",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@shopventory.com\",\n  \"password\": \"User1234!\",\n  \"name\": \"Laura\",\n  \"surname\": \"Martínez\",\n  \"phone\": \"+34 600 000 002\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Aprobar usuario pendiente",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/users/{{pendingUserId}}/approve",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "users",
+                "{{pendingUserId}}",
+                "approve"
+              ]
+            },
+            "description": "Aprueba el registro pendiente del usuario con id `pendingUserId` (por defecto pending@shopventory.com)."
+          },
+          "response": []
+        },
+        {
+          "name": "Habilitar / deshabilitar cuenta",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/users/{{userId}}/enabled?value=true",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "users",
+                "{{userId}}",
+                "enabled"
+              ],
+              "query": [
+                {
+                  "key": "value",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Activa (value=true) o desactiva (value=false) una cuenta de usuario."
+          },
+          "response": []
+        },
+        {
+          "name": "Usuarios pendientes de aprobación",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/users/pending",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "users",
+                "pending"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/users/{{createdUserId}}",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "users",
+                "{{createdUserId}}"
+              ]
+            },
+            "description": "Elimina el usuario creado con `Registrar nuevo usuario`. Ejecuta antes ese registro para rellenar `createdUserId`."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Providers",
+      "description": "Gestión de proveedores. El listado y el detalle son accesibles por cualquier usuario autenticado; crear, actualizar y eliminar requieren rol ADMIN.",
+      "item": [
+        {
+          "name": "Listar proveedores",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/providers?page=0&size=10",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "providers"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "tech",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "name,asc",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lista paginada. `search` filtra por nombre, persona de contacto o email."
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener proveedor por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/providers/{{providerId}}",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "providers",
+                "{{providerId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear proveedor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://localhost:443/api/providers",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "providers"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Importaciones del Norte S.L.\",\n  \"address\": \"Calle Comercio 25, Sevilla\",\n  \"phoneNumber\": \"+34 954 000 111\",\n  \"website\": \"https://importnorte.es\",\n  \"contactPerson\": \"Lucía Romero\",\n  \"email\": \"ventas@importnorte.es\",\n  \"types\": [\n    \"Electronics\",\n    \"Accessories\",\n    \"Gadgets\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "    try {",
+                  "        var data = pm.response.json();",
+                  "        if (data && data.id !== undefined) {",
+                  "            pm.collectionVariables.set(\"createdProviderId\", data.id);",
+                  "            console.log(\"Guardado createdProviderId =\", data.id);",
+                  "        }",
+                  "    } catch (e) { /* respuesta sin cuerpo JSON */ }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar proveedor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://localhost:443/api/providers/{{providerId}}",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "providers",
+                "{{providerId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"TechSupplies S.L.\",\n  \"address\": \"Calle Mayor 1, Madrid\",\n  \"phoneNumber\": \"+34 911 234 567\",\n  \"website\": \"https://techsupplies.es\",\n  \"contactPerson\": \"Carlos García\",\n  \"email\": \"info@techsupplies.es\",\n  \"types\": [\n    \"Electronics\",\n    \"Hardware\",\n    \"Computers\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar proveedor",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/providers/{{createdProviderId}}",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "providers",
+                "{{createdProviderId}}"
+              ]
+            },
+            "description": "Elimina el proveedor creado con `Crear proveedor` (variable `createdProviderId`)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "description": "Gestión de productos, stock e imágenes. Listados y detalle son públicos para usuarios autenticados; crear/actualizar/eliminar e imágenes requieren rol ADMIN. El ajuste de stock requiere autenticación.",
+      "item": [
+        {
+          "name": "Listar productos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/products?page=0&size=10",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "laptop",
+                  "disabled": true
+                },
+                {
+                  "key": "category",
+                  "value": "Electronics",
+                  "disabled": true
+                },
+                {
+                  "key": "providerId",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "name,asc",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lista paginada. Filtros opcionales (excluyentes): `search`, `category` o `providerId`."
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener producto por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/products/{{productId}}",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "products",
+                "{{productId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Productos con stock bajo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/products/low-stock?page=0&size=10",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "products",
+                "low-stock"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "id,desc",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Productos cuyo stock está por debajo de su umbral mínimo."
+          },
+          "response": []
+        },
+        {
+          "name": "Crear producto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://localhost:443/api/products",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Tablet Pro 11\",\n  \"sku\": \"TAB-001\",\n  \"description\": \"11-inch tablet with stylus support and 256GB storage\",\n  \"descriptionShort\": \"Tablet Pro de 11 pulgadas\",\n  \"price\": 649.99,\n  \"stock\": 20,\n  \"minStockThreshold\": 5,\n  \"categories\": [\n    \"Electronics\",\n    \"Tablets\"\n  ],\n  \"providerIds\": [\n    1,\n    5\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "    try {",
+                  "        var data = pm.response.json();",
+                  "        if (data && data.id !== undefined) {",
+                  "            pm.collectionVariables.set(\"createdProductId\", data.id);",
+                  "            console.log(\"Guardado createdProductId =\", data.id);",
+                  "        }",
+                  "    } catch (e) { /* respuesta sin cuerpo JSON */ }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar producto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://localhost:443/api/products/{{productId}}",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "products",
+                "{{productId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Laptop Pro 15\",\n  \"sku\": \"LAP-001\",\n  \"description\": \"High performance laptop for professionals - edición 2026\",\n  \"descriptionShort\": \"Laptop Pro de 15 pulgadas\",\n  \"price\": 1349.99,\n  \"stock\": 25,\n  \"minStockThreshold\": 5,\n  \"categories\": [\n    \"Electronics\",\n    \"Computers\"\n  ],\n  \"providerIds\": [\n    1\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ajustar stock manualmente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://localhost:443/api/products/{{productId}}/stock",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "stock"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 10,\n  \"reason\": \"Reposición manual de inventario\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Suma (quantity positivo) o resta (quantity negativo) unidades de stock y registra el movimiento."
+          },
+          "response": []
+        },
+        {
+          "name": "Historial de movimientos de stock",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/products/{{productId}}/stock-movements?page=0&size=10",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "stock-movements"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "date,desc",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener imagen de producto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/products/{{productId}}/image",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "image"
+              ]
+            },
+            "description": "Devuelve la imagen del producto (image/jpeg)."
+          },
+          "response": []
+        },
+        {
+          "name": "Subir / reemplazar imagen de producto",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/products/{{productId}}/image",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "image"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "Selecciona un archivo de imagen (jpg/png)."
+                }
+              ]
+            },
+            "description": "Sube o reemplaza la imagen del producto. Es multipart/form-data con un campo `file` de tipo File: elige el archivo en la pestaña Body antes de enviar."
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar imagen de producto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/products/{{productId}}/image",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "image"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar producto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/products/{{createdProductId}}",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "products",
+                "{{createdProductId}}"
+              ]
+            },
+            "description": "Elimina el producto creado con `Crear producto` (variable `createdProductId`)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "description": "Pedidos de venta (SALE) y compra (PURCHASE). Crear, listar, ver y cancelar requieren autenticación; confirmar, entregar y eliminar requieren rol ADMIN.\n\nEstados de los pedidos de ejemplo: id 4 y 7 = PENDING, id 3 y 5 = CONFIRMED, id 1, 2 y 6 = DELIVERED.",
+      "item": [
+        {
+          "name": "Listar pedidos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/orders?page=0&size=10",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "orders"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "SALE",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "orderDate,desc",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lista paginada. Filtro opcional `type` = SALE o PURCHASE."
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener pedido por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/orders/{{orderId}}",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "orders",
+                "{{orderId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear pedido (venta / SALE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://localhost:443/api/orders",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"SALE\",\n  \"notes\": \"Venta de prueba creada desde Postman\",\n  \"discount\": 0,\n  \"customerName\": \"Cliente de Prueba S.L.\",\n  \"customerEmail\": \"cliente@prueba.es\",\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"quantity\": 1\n    },\n    {\n      \"productId\": 5,\n      \"quantity\": 2\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "    try {",
+                  "        var data = pm.response.json();",
+                  "        if (data && data.id !== undefined) {",
+                  "            pm.collectionVariables.set(\"createdOrderId\", data.id);",
+                  "            console.log(\"Guardado createdOrderId =\", data.id);",
+                  "        }",
+                  "    } catch (e) { /* respuesta sin cuerpo JSON */ }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear pedido (compra / PURCHASE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://localhost:443/api/orders",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"PURCHASE\",\n  \"notes\": \"Compra de reposición creada desde Postman\",\n  \"providerId\": 1,\n  \"discount\": 0,\n  \"items\": [\n    {\n      \"productId\": 4,\n      \"quantity\": 10\n    },\n    {\n      \"productId\": 7,\n      \"quantity\": 5\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "    try {",
+                  "        var data = pm.response.json();",
+                  "        if (data && data.id !== undefined) {",
+                  "            pm.collectionVariables.set(\"createdOrderId\", data.id);",
+                  "            console.log(\"Guardado createdOrderId =\", data.id);",
+                  "        }",
+                  "    } catch (e) { /* respuesta sin cuerpo JSON */ }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Confirmar pedido (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/orders/{{pendingOrderId}}/confirm",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "orders",
+                "{{pendingOrderId}}",
+                "confirm"
+              ]
+            },
+            "description": "Confirma un pedido en estado PENDING y actualiza el stock automáticamente. Por defecto usa `pendingOrderId` (id 7)."
+          },
+          "response": []
+        },
+        {
+          "name": "Marcar pedido como entregado (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/orders/{{confirmedOrderId}}/deliver",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "orders",
+                "{{confirmedOrderId}}",
+                "deliver"
+              ]
+            },
+            "description": "Marca como DELIVERED un pedido en estado CONFIRMED. Por defecto usa `confirmedOrderId` (id 5)."
+          },
+          "response": []
+        },
+        {
+          "name": "Cancelar pedido",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/orders/{{pendingOrderId}}/cancel",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "orders",
+                "{{pendingOrderId}}",
+                "cancel"
+              ]
+            },
+            "description": "Cancela un pedido que no esté ya entregado."
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar pedido (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/orders/{{createdOrderId}}",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "orders",
+                "{{createdOrderId}}"
+              ]
+            },
+            "description": "Elimina el pedido creado con `Crear pedido` (variable `createdOrderId`)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Employees (Admin)",
+      "description": "Gestión de empleados. Todos los endpoints requieren rol ADMIN (ejecuta `Login (admin)`).",
+      "item": [
+        {
+          "name": "Listar empleados",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/employees?page=0&size=10",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "employees"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "ana",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "surname,asc",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lista paginada. `search` filtra por nombre, apellido, email o puesto."
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener empleado por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/employees/{{employeeId}}",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "employees",
+                "{{employeeId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear empleado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://localhost:443/api/employees",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "employees"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nuevo\",\n  \"surname\": \"Empleado\",\n  \"email\": \"nuevo.empleado@shopventory.com\",\n  \"phone\": \"+34 611 005 005\",\n  \"position\": \"Sales Assistant\",\n  \"hireDate\": \"2026-06-04\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Crea un empleado. Opcionalmente puedes añadir `userId` para vincularlo a una cuenta de usuario existente."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "    try {",
+                  "        var data = pm.response.json();",
+                  "        if (data && data.id !== undefined) {",
+                  "            pm.collectionVariables.set(\"createdEmployeeId\", data.id);",
+                  "            console.log(\"Guardado createdEmployeeId =\", data.id);",
+                  "        }",
+                  "    } catch (e) { /* respuesta sin cuerpo JSON */ }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar empleado",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://localhost:443/api/employees/{{employeeId}}",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "employees",
+                "{{employeeId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ana\",\n  \"surname\": \"González\",\n  \"email\": \"ana.gonzalez@shopventory.com\",\n  \"phone\": \"+34 611 001 001\",\n  \"position\": \"Store Manager\",\n  \"hireDate\": \"2022-01-15\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar empleado",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/employees/{{createdEmployeeId}}",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "employees",
+                "{{createdEmployeeId}}"
+              ]
+            },
+            "description": "Elimina el empleado creado con `Crear empleado` (variable `createdEmployeeId`)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "description": "Métricas y estadísticas. Requiere autenticación.",
+      "item": [
+        {
+          "name": "Resumen de estadísticas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/dashboard/stats",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "dashboard",
+                "stats"
+              ]
+            },
+            "description": "Resumen para el panel: totales de productos, proveedores, usuarios, pedidos, ventas, top productos, distribución por categorías, etc."
+          },
+          "response": []
+        },
+        {
+          "name": "Todos los movimientos de stock",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:443/api/dashboard/stock-movements?page=0&size=10",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "443",
+              "path": [
+                "api",
+                "dashboard",
+                "stock-movements"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "date,desc",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "noauth"
+  },
+  "event": [],
+  "variable": [
+    {
+      "key": "adminUsername",
+      "value": "admin@shopventory.com",
+      "type": "string"
+    },
+    {
+      "key": "adminPassword",
+      "value": "Admin1234!",
+      "type": "string"
+    },
+    {
+      "key": "userUsername",
+      "value": "user@shopventory.com",
+      "type": "string"
+    },
+    {
+      "key": "userPassword",
+      "value": "User1234!",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "2",
+      "type": "string"
+    },
+    {
+      "key": "pendingUserId",
+      "value": "3",
+      "type": "string"
+    },
+    {
+      "key": "providerId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "pendingOrderId",
+      "value": "7",
+      "type": "string"
+    },
+    {
+      "key": "confirmedOrderId",
+      "value": "5",
+      "type": "string"
+    },
+    {
+      "key": "employeeId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "createdUserId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "createdProviderId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "createdProductId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "createdOrderId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "createdEmployeeId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

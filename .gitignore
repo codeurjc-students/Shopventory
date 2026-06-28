@@ -1,3 +1,9 @@
 /.vscode/
 /.idea/
 .gitignore
+
+# Environment files with secrets (do NOT commit)
+.env
+*.env
+!*.env.example
+docker/.env

@@ -11,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -70,6 +71,15 @@ public class GlobalExceptionHandler {
         body.put("error", "Validation failed");
         body.put("details", errors);
         return ResponseEntity.badRequest().body(body);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNoResourceFound(NoResourceFoundException ex) {
+        // A missing static resource is a normal 404, not a server error. Logged at
+        // DEBUG only so vulnerability scanners probing for paths like /owa/auth/x.js
+        // don't flood the logs with stack traces.
+        LOG.debug("No resource found: {}", ex.getResourcePath());
+        return buildError(HttpStatus.NOT_FOUND, "Resource not found");
     }
 
     @ExceptionHandler(Exception.class)

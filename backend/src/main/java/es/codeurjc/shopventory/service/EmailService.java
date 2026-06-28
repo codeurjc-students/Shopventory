@@ -18,7 +18,7 @@ public class EmailService {
     @Value("${app.email.enabled:false}")
     private boolean enabled;
 
-    @Value("${app.email.from:shopventory.alerts@gmail.com}")
+    @Value("${app.email.from:noreply.shopventory@gmail.com}")
     private String from;
 
     public EmailService(JavaMailSender mailSender) {
