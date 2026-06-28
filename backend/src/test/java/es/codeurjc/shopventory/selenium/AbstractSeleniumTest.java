@@ -2,13 +2,16 @@ package es.codeurjc.shopventory.selenium;
 
 import es.codeurjc.shopventory.model.User;
 import es.codeurjc.shopventory.repository.UserRepository;
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.edge.EdgeDriver;
+import org.openqa.selenium.edge.EdgeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,7 +35,7 @@ import java.util.List;
  *    users are seeded here for the login-related flows.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
+@ActiveProfiles({"test", "selenium"})
 abstract class AbstractSeleniumTest {
 
     @LocalServerPort
@@ -53,11 +56,7 @@ abstract class AbstractSeleniumTest {
                 "Angular SPA not found in static/ — build the frontend first "
                         + "(skipping Selenium UI tests).");
 
-        WebDriverManager.chromedriver().setup();
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless=new", "--no-sandbox",
-                "--disable-dev-shm-usage", "--disable-gpu", "--window-size=1280,1024");
-        driver = new ChromeDriver(options);
+        driver = createDriver();
         wait = new WebDriverWait(driver, Duration.ofSeconds(15));
 
         seedUsers();
@@ -70,13 +69,51 @@ abstract class AbstractSeleniumTest {
         }
     }
 
+    /**
+     * Creates a headless browser. Prefers Edge; falls back to Chrome (both are
+     * Chromium-based and share the same flags), so the tests run on machines
+     * that have either one installed. The driver binary is resolved
+     * automatically by Selenium Manager (built into Selenium 4.x).
+     */
+    private WebDriver createDriver() {
+        String[] flags = {"--headless=new", "--no-sandbox",
+                "--disable-dev-shm-usage", "--disable-gpu", "--window-size=1280,1024"};
+        try {
+            EdgeOptions options = new EdgeOptions();
+            options.addArguments(flags);
+            options.setAcceptInsecureCerts(true); // self-signed cert over HTTPS
+            return new EdgeDriver(options);
+        } catch (Exception edgeUnavailable) {
+            ChromeOptions options = new ChromeOptions();
+            options.addArguments(flags);
+            options.setAcceptInsecureCerts(true);
+            return new ChromeDriver(options);
+        }
+    }
+
     /** True when the built Angular index.html is present on the classpath. */
     protected static boolean isFrontendBuilt() {
         return AbstractSeleniumTest.class.getClassLoader().getResource("static/index.html") != null;
     }
 
     protected String url(String path) {
-        return "http://localhost:" + port + path;
+        // HTTPS so the Secure JWT cookies are kept by the browser (the "selenium"
+        // profile enables SSL). The self-signed cert is accepted by the driver.
+        return "https://localhost:" + port + path;
+    }
+
+    private static final By USERNAME_INPUT = By.cssSelector("input[formControlName='username']");
+    private static final By PASSWORD_INPUT = By.cssSelector("input[formControlName='password']");
+    private static final By SUBMIT_BUTTON = By.cssSelector("button[type='submit']");
+
+    /** Logs in through the real login form and waits until the dashboard is reached. */
+    protected void loginAs(String email, String password) {
+        driver.get(url("/login"));
+        wait.until(ExpectedConditions.presenceOfElementLocated(USERNAME_INPUT));
+        driver.findElement(USERNAME_INPUT).sendKeys(email);
+        driver.findElement(PASSWORD_INPUT).sendKeys(password);
+        driver.findElement(SUBMIT_BUTTON).click();
+        wait.until(ExpectedConditions.urlContains("/dashboard"));
     }
 
     /** Seeds the canonical admin and standard users (DataInitializer is off under "test"). */
