@@ -11,7 +11,7 @@ COPY backend/pom.xml /project/
 RUN mvn dependency:go-offline -B
 COPY backend/src /project/src
 COPY --from=angular /code/dist/shopventory/browser /project/src/main/resources/static
-RUN mvn package -DskipTests=true
+RUN mvn package -DskipTests=true -DskipFrontend=true
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
