@@ -1,6 +1,8 @@
 /.vscode/
 /.idea/
 .gitignore
+.claude
+ROADMAP.txt
 
 # Environment files with secrets (do NOT commit)
 .env
