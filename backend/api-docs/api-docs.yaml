@@ -7,7 +7,7 @@ info:
     Authentication is based on JWT. After a successful login the access and refresh tokens are stored in HttpOnly cookies (`AuthToken` and `RefreshToken`); a `Bearer` token in the `Authorization` header is also accepted. Access is role-based (`ADMIN` and `USER`) and list endpoints are paginated.
   contact:
     name: Alberto — Shopventory (TFG)
-  version: 0.0.1-SNAPSHOT
+  version: 1.0.0
 servers:
 - url: https://localhost:8443
   description: Local development server

@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>es.codeurjc</groupId>
 	<artifactId>shopventory</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>shopventory</name>
 	<description>Inventory management web application for small businesses</description>
 	<packaging>jar</packaging>
