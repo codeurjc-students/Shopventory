@@ -15,6 +15,6 @@ RUN mvn package -DskipTests=true -DskipFrontend=true
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-COPY --from=builder /project/target/shopventory-0.0.1-SNAPSHOT.jar /app/shopventory.jar
+COPY --from=builder /project/target/shopventory-1.0.0.jar /app/shopventory.jar
 EXPOSE 8443
 ENTRYPOINT ["java", "-jar", "shopventory.jar"]
