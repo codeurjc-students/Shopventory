@@ -145,7 +145,7 @@ erDiagram
     }
 
     User ||--o{ Order : "crea"
-    User |o--o| Employee : "vinculado a"
+    User |o--o| Employee : "vinculado a (no usado en UI)"
     User ||--o{ StockMovement : "realiza"
     Order ||--|{ OrderItem : "contiene"
     OrderItem }o--|| Product : "referencia"
@@ -153,6 +153,8 @@ erDiagram
     Order }o--o| Provider : "compra a"
     StockMovement }o--|| Product : "afecta a"
 ```
+
+> La FK `userId` en `Employee` existe en el modelo y la API del backend (`EmployeeDTO.userId`, `EmployeeService`), pero **no está expuesta en el frontend**: el formulario de empleados no permite vincular un usuario. En la práctica, `Employee` y `User` son dos entidades independientes — los empleados no son cuentas de acceso a la aplicación.
 
 ---
 
