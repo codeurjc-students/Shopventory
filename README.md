@@ -299,32 +299,57 @@ flowchart TD
 
 ## Ejecución
 
+Esta aplicación no se distribuye como imagen pública en Docker Hub. Para ejecutarla, cada usuario debe construir su propia imagen a partir del código fuente.
+
 ### Requisitos
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (versión 24+)
+- Git (opcional, para clonar en lugar de descargar el ZIP)
 
-### Descargar el docker-compose.yml
+### 1. Descargar el código fuente
 
-Descarga el fichero desde el repositorio:
+Descarga la última release estable desde la sección **Releases** del repositorio de GitHub (botón "Source code (zip)"), o clónala directamente:
 
 ```bash
-curl -O https://raw.githubusercontent.com/codeurjc-students/Shopventory/main/docker/docker-compose.yml
+git clone https://github.com/codeurjc-students/Shopventory.git
+cd Shopventory
+git checkout vX.Y.Z   # sustituye por el tag de la última release publicada
 ```
 
-### Configurar variables de entorno
+### 2. Construir la imagen Docker
 
-Crea un fichero `.env` en el mismo directorio que `docker-compose.yml`:
+```bash
+docker build -f docker/Dockerfile -t TU_USUARIO/shopventory:latest .
+```
+
+> Sustituye `TU_USUARIO` por tu propio usuario de Docker Hub si vas a publicarla, o usa cualquier nombre (por ejemplo `shopventory:latest`) si solo la vas a ejecutar en tu máquina.
+
+### 3. Configurar variables de entorno
+
+Copia la plantilla y crea tu propio `.env` en el directorio `docker/`:
+
+```bash
+cd docker
+cp .env.example .env
+```
+
+Edita `docker/.env` con tus propios valores, incluyendo la imagen que acabas de construir:
 
 ```env
+DOCKER_IMAGE=TU_USUARIO/shopventory:latest
 DB_PASSWORD=tu_contraseña_de_base_de_datos
 JWT_SECRET=tu_clave_secreta_jwt_de_al_menos_32_caracteres
-MAIL_USERNAME=tu_cuenta@gmail.com   # opcional
+MAIL_USERNAME=tu_cuenta@gmail.com   # opcional, habilita las alertas de stock por correo
 MAIL_PASSWORD=tu_app_password       # opcional
 ```
 
-### Iniciar y parar
+> No es necesario editar `docker-compose.yml`: el fichero lee el nombre de la imagen desde `DOCKER_IMAGE` en tu `.env`.
+
+### 4. Iniciar y parar la aplicación
 
 ```bash
+cd docker
+
 # Iniciar
 docker-compose up -d
 
@@ -616,9 +641,9 @@ La suite incluye 76 tests: 56 unitarios (Mockito), 8 de integración (MockMvc) y
 ### Publicar una release
 
 1. Actualizar la versión en `backend/pom.xml`, `docker/Dockerfile`, `frontend/package.json` y `backend/api-docs/api-docs.yaml`
-2. Commit + merge a `main` → el workflow de GitHub Actions publica automáticamente `tomy014/shopventory:latest` en Docker Hub
-3. Actualizar `docker/docker-compose.yml` para referenciar el tag de versión explícito:
+2. Commit + merge a `main`. El workflow de GitHub Actions (`.github/workflows/docker-publish.yml`) construye la imagen automáticamente; para que la publique en Docker Hub hace falta configurar en el repositorio los secretos `DOCKERHUB_USERNAME` y `DOCKERHUB_TOKEN` con una cuenta propia
+3. Actualizar `docker/docker-compose.yml` para referenciar el tag de versión explícito en lugar de `latest`:
    ```yaml
-   image: tomy014/shopventory:1.0.0
+   image: TU_USUARIO/shopventory:1.0.0
    ```
-4. Crear la GitHub Release con el tag `vX.Y.Z` sobre `main`
+4. Crear la GitHub Release con el tag `vX.Y.Z` sobre `main`, adjuntando el código fuente para que quede disponible en la sección Releases
