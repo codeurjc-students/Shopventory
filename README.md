@@ -662,12 +662,3 @@ La suite incluye 76 tests: 56 unitarios (Mockito), 8 de integración (MockMvc) y
 
 ---
 
-### Publicar una release
-
-1. Actualizar la versión en `backend/pom.xml`, `docker/Dockerfile`, `frontend/package.json` y `backend/api-docs/api-docs.yaml`
-2. Commit + merge a `main`. El workflow de GitHub Actions (`.github/workflows/docker-publish.yml`) construye la imagen automáticamente; para que la publique en Docker Hub hace falta configurar en el repositorio los secretos `DOCKERHUB_USERNAME` y `DOCKERHUB_TOKEN` con una cuenta propia
-3. Actualizar `docker/docker-compose.yml` para referenciar el tag de versión explícito en lugar de `latest`:
-   ```yaml
-   image: TU_USUARIO/shopventory:1.0.0
-   ```
-4. Crear la GitHub Release con el tag `vX.Y.Z` sobre `main`, adjuntando el código fuente para que quede disponible en la sección Releases
