@@ -10,7 +10,25 @@ Aplicación web de gestión de inventario para pequeños negocios. Permite regis
 
 ## Capturas de pantalla
 
+#### Login
 
+<img width="900" alt="Página de login" src="https://github.com/user-attachments/assets/991c6da8-356c-45c1-ab36-6149c385e2d9" />
+
+#### Dashboard
+
+<img width="900" alt="Dashboard con KPIs y gráficos" src="https://github.com/user-attachments/assets/7980293e-9464-422d-948c-982cbcd6ccf7" />
+
+#### Listado de productos
+
+<img width="900" alt="Listado de productos" src="https://github.com/user-attachments/assets/498b0b08-8a4a-4eeb-8908-2400dbbbe51d" />
+
+#### Detalle de producto
+
+<img width="900" alt="Detalle de producto" src="https://github.com/user-attachments/assets/ed1f202a-5b27-45a4-bc34-2ea40ad3c810" />
+
+#### Crear producto
+
+<img width="900" alt="Formulario de creación de producto" src="https://github.com/user-attachments/assets/8d36f889-3486-4e28-9791-94acb1a9ef2f" />
 
 ---
 
@@ -217,40 +235,6 @@ erDiagram
 Tras cada actualización de stock, el servicio verifica si el nuevo nivel cruza por debajo del umbral mínimo (`minStockThreshold`). La alerta solo se envía en el momento del cruce — no en cada movimiento si el stock ya estaba por debajo — evitando duplicar notificaciones. El mismo mecanismo se activa al confirmar pedidos de venta que descuenten unidades de varios productos.
 
 La consulta avanzada del dashboard agrupa los productos por categoría con una query JPQL sobre una colección `@ElementCollection`, calculando la distribución sin duplicar información en el modelo.
-
----
-
-## Capturas de pantalla por pantalla
-
-<!-- CAPTURA: login -->
-**Login** — Formulario de acceso con enlace a registro.
-
-<!-- CAPTURA: register -->
-**Registro** — Formulario de creación de cuenta; queda pendiente de aprobación.
-
-<!-- CAPTURA: dashboard -->
-**Dashboard** — KPIs del negocio y gráficos de inventario.
-
-<!-- CAPTURA: product-list -->
-**Productos** — Listado paginado con búsqueda y alertas de bajo stock.
-
-<!-- CAPTURA: product-detail -->
-**Detalle de producto** — Información completa, imagen y movimientos de stock.
-
-<!-- CAPTURA: order-list -->
-**Pedidos** — Listado de ventas y compras con estado.
-
-<!-- CAPTURA: order-form -->
-**Nuevo pedido** — Formulario con selección de productos y proveedor.
-
-<!-- CAPTURA: provider-list -->
-**Proveedores** — Listado con búsqueda.
-
-<!-- CAPTURA: employee-list -->
-**Empleados** — Solo visible para administradores.
-
-<!-- CAPTURA: user-list -->
-**Usuarios** — Gestión de cuentas y aprobaciones (solo administrador).
 
 ---
 
