@@ -68,6 +68,7 @@ erDiagram
     User {
         Long id PK
         String email
+        String encodedPassword
         String name
         String surname
         String phone
@@ -81,6 +82,7 @@ erDiagram
         String name
         String sku
         String description
+        String descriptionShort
         BigDecimal price
         int stock
         int minStockThreshold
@@ -104,19 +106,26 @@ erDiagram
         OrderStatus status
         LocalDateTime orderDate
         LocalDate deliveryDate
+        String notes
         BigDecimal discount
         BigDecimal totalAmount
         String customerName
         String customerEmail
+        Long createdByUserId FK
+        Long providerId FK
     }
     OrderItem {
         Long id PK
+        Long orderId FK
+        Long productId FK
         int quantity
         BigDecimal unitPrice
         BigDecimal subtotal
     }
     StockMovement {
         Long id PK
+        Long productId FK
+        Long performedByUserId FK
         int quantity
         int stockBefore
         int stockAfter
@@ -126,6 +135,7 @@ erDiagram
     }
     Employee {
         Long id PK
+        Long userId FK
         String name
         String surname
         String email
@@ -135,13 +145,13 @@ erDiagram
     }
 
     User ||--o{ Order : "crea"
-    User ||--o| Employee : "vinculado a"
+    User |o--o| Employee : "vinculado a"
     User ||--o{ StockMovement : "realiza"
     Order ||--|{ OrderItem : "contiene"
-    OrderItem }|--|| Product : "referencia"
-    Product }|--|{ Provider : "suministrado por"
-    Order }o--|| Provider : "compra a"
-    StockMovement }|--|| Product : "afecta a"
+    OrderItem }o--|| Product : "referencia"
+    Product }o--o{ Provider : "suministrado por"
+    Order }o--o| Provider : "compra a"
+    StockMovement }o--|| Product : "afecta a"
 ```
 
 ---
@@ -417,8 +427,15 @@ flowchart LR
         JRF[JwtRequestFilter]
         JTP[JwtTokenProvider]
         JCM[JwtCookieManager]
-        RSC --> JRF --> JTP
-        JRF --> JCM
+        ULS[UserLoginService]
+        RUDS[RepositoryUserDetailsService]
+        RSC --> JRF
+        RSC --> RUDS
+        JRF --> JTP
+        JRF --> RUDS
+        ULS --> JTP
+        ULS --> JCM
+        ULS --> RUDS
     end
 
     subgraph CTR["🎮 Controllers"]
@@ -443,6 +460,7 @@ flowchart LR
         SMS[StockMovementService]
         DS[DashboardService]
         EMS[EmailService]
+        DIS["DataInitializerService 🌱"]
     end
 
     subgraph REP["🗄️ Repositories"]
@@ -467,6 +485,7 @@ flowchart LR
         SM[StockMovement]
     end
 
+    LRC --> ULS
     LRC --> US
     PRC --> PS
     ORC --> OS
@@ -480,17 +499,26 @@ flowchart LR
     PS --> PR
     OS --> OR
     OS --> PR
+    OS --> VR
+    OS --> UR
+    OS --> SMS
     OS --> EMS
     VS --> VR
     ES --> ER
     ES --> UR
     SMS --> SR
     SMS --> PR
+    SMS --> UR
     SMS --> EMS
     DS --> PR
     DS --> OR
     DS --> VR
     DS --> UR
+    DIS --> UR
+    DIS --> PR
+    DIS --> VR
+    DIS --> ER
+    DIS --> OR
 
     UR --> U
     PR --> P
@@ -501,6 +529,8 @@ flowchart LR
     SR --> SM
     OIR --> OI
 ```
+
+> `DataInitializerService` (marcado 🌱) no es invocado por ningún controlador: se ejecuta una sola vez al arrancar la aplicación (`ApplicationReadyEvent`) para sembrar los datos de ejemplo, y está deshabilitado en el perfil `test`.
 
 ---
 
@@ -539,15 +569,20 @@ flowchart TD
     APP --> PA[PendingApprovalComponent]
     APP --> NF[NotFoundComponent]
     APP --> FB[ForbiddenComponent]
+    APP --> SE[ServerErrorComponent]
 ```
 
-**Servicios y guards:**
+**Servicios, guards e interceptor:**
 
 ```mermaid
 flowchart LR
     subgraph GUARDS["Guards"]
         AG[AuthGuard]
         ADG[AdminGuard]
+    end
+
+    subgraph INTC["Interceptor"]
+        EI[ErrorInterceptor]
     end
 
     subgraph SVC["Services"]
@@ -573,6 +608,7 @@ flowchart LR
 
     AG --> AS
     ADG --> AS
+    EI --> AS
     NAV --> AS
     AUTH --> AS
     DASH --> DS
@@ -584,6 +620,8 @@ flowchart LR
     ELC --> ES
     ULC --> US
 ```
+
+> `ErrorInterceptor` es un `HttpInterceptor` global: intercepta todas las respuestas HTTP y redirige automáticamente según el código de error (401 → `/login`, 403 → `/403`, 404 → `/404`, 5xx → `/500`).
 
 ---
 
