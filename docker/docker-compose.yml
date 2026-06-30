@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   web:
-    image: tomy014/shopventory
+    image: ${DOCKER_IMAGE:?set DOCKER_IMAGE in docker/.env}
     ports:
       - "443:8443"
     environment:
